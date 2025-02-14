@@ -30,5 +30,4 @@ end
 f = Figure()
 ax3d = Axis3(f[1,1], title = "Tetraheder points")
 scatter!(ax3d, Blocks.Tetraheder)
-save("tetraheder.png", f)
 f =#
