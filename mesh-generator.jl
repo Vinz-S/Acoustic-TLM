@@ -4,6 +4,7 @@
 using GLMakie
 
 module Blocks #Coordinates of a base block x,y,z
+    # export Cartesian, Tetraheder
     Cartesian = [(x,y,z) for x = 0:1, y = 0:1, z = 0:1]
     Cartesian = [Cartesian[i] for i = eachindex(Cartesian)]
     #Originally used half as big coordinates for the tetahedal, but scaled up so all values can be integers
@@ -16,18 +17,20 @@ module Blocks #Coordinates of a base block x,y,z
 end
 
 module Generator
+# import ..Blocks
     #Multithreading the process of multiplying the blocks?
     #Finding the neigbours by checkings what nodes are within a set radius
     mutable struct Node     #The node 
-        ID::UInt64
-        x::UInt64 #Coordinates of the node
-        y::UInt64
-        z::UInt64
+        ID::Int64
+        x::Int64 #Coordinates of the node
+        y::Int64
+        z::Int64
         #Neigbouring stuff, outgoing pressures, neighbouring nodes, etc. Might just be a placeholder
-        neighbours::Vector{}
+        neighbours::Vector{Int64}
     end;
 
-    function mesh(dimensions::Tuple{Int64, Int64, Int64}, crystal::Vector{Tuple{Int64, Int64, Int64}})
+    function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::Vector{Tuple{Int64, Int64, Int64}})
+        transmission_line_length = sqrt(1^2+1^2+1^2)
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
         for x = 1:ceil(dimensions[1]/crystal_size)
@@ -39,13 +42,36 @@ module Generator
                 end
             end
         end
-        return coordinates
+
+        nodes = Dict()
+        for (i, coord) in enumerate(coordinates)
+            nodes[i] = Node(i, coord[1], coord[2], coord[3], [])
+        end
+        
+        for i = eachindex(nodes)
+            for j = eachindex(nodes)
+                i == j ? continue : nothing
+                if sqrt((nodes[i].x-nodes[j].x)^2 + (nodes[i].y-nodes[j].y)^2 + (nodes[i].z-nodes[j].z)^2) <= transmission_line_length+0.05*transmission_line_length
+                    push!(nodes[i].neighbours, nodes[j].ID)
+                end
+            end
+        end
+        
+        display(nodes)
+        return nodes
     end
 end
 
+n=Generator.nodes((8,8,4), Blocks.Tetraheder)
 
-#Visually seeing that the coordinates are correct:
-#= f = Figure()
-ax3d = Axis3(f[1,1], title = "Tetraheder points")
-scatter!(ax3d, [i for i = Generator.mesh((8,8,4), Blocks.Tetraheder)], markersize = 10)
-f =#
+function show_mesh(nodes)
+    #Visually seeing that the coordinates are correct:
+    fig = Figure()
+    ax3d = Axis3(fig[1,1], title = "Tetraheder points")
+    scatter!(ax3d, [nodes[i].x for i = eachindex(nodes)],[nodes[i].y for i = eachindex(nodes)],[nodes[i].z for i = eachindex(nodes)], markersize = 10)
+    display(fig)
+    for 
+
+    return fig
+end
+f = show_mesh(n)
