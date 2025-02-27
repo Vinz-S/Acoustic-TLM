@@ -70,8 +70,10 @@ function show_mesh(nodes)
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
     scatter!(ax3d, [nodes[i].x for i = eachindex(nodes)],[nodes[i].y for i = eachindex(nodes)],[nodes[i].z for i = eachindex(nodes)], markersize = 10)
     display(fig)
-    for 
-
+    transmission_lines = [(nodes[i].x, nodes[i].y, nodes[i].z, nodes[j].x, nodes[j].y, nodes[j].z) for i in eachindex(nodes) for j in nodes[i].neighbours]
+    for line in transmission_lines
+        lines!(ax3d, [line[1], line[4]], [line[2], line[5]], [line[3], line[6]], color = :blue)
+    end
     return fig
 end
 f = show_mesh(n)
