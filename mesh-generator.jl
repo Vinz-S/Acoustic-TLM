@@ -2,6 +2,7 @@
 #using JLD2
 #using FileIO
 using GLMakie
+using NearestNeighbors
 
 module Blocks #Coordinates of a base block x,y,z
     # export Cartesian, Tetraheder
@@ -17,16 +18,14 @@ module Blocks #Coordinates of a base block x,y,z
 end
 
 module Generator
+    using NearestNeighbors: KDTree, inrange
+    using StaticArrays
 # import ..Blocks
     #Multithreading the process of multiplying the blocks?
     #Finding the neigbours by checkings what nodes are within a set radius
-    mutable struct Node     #The node 
-        ID::Int64
-        x::Int64 #Coordinates of the node
-        y::Int64
-        z::Int64
+    mutable struct Node     #The node
         #Neigbouring stuff, outgoing pressures, neighbouring nodes, etc. Might just be a placeholder
-        neighbours::Vector{Int64}
+        neighbours #::Vector{Int64}
     end;
 
     function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::Vector{Tuple{Int64, Int64, Int64}})
@@ -42,35 +41,30 @@ module Generator
                 end
             end
         end
-
         nodes = Dict()
-        for (i, coord) in enumerate(coordinates)
-            nodes[i] = Node(i, coord[1], coord[2], coord[3], [])
+        data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
+        for coord in data
+            nodes[coord] = Node([])
         end
-        
-        for i = eachindex(nodes)
-            for j = eachindex(nodes)
-                i == j ? continue : nothing
-                if sqrt((nodes[i].x-nodes[j].x)^2 + (nodes[i].y-nodes[j].y)^2 + (nodes[i].z-nodes[j].z)^2) <= transmission_line_length+0.05*transmission_line_length
-                    push!(nodes[i].neighbours, nodes[j].ID)
-                end
-            end
+        #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
+        kdtree = KDTree(data)
+        for key in keys(nodes)
+            neighbours = [data[index] for index in inrange(kdtree, key, transmission_line_length+0.01)]
+            nodes[key].neighbours = filter!(v->v!=key,neighbours)
         end
-        
-        display(nodes)
         return nodes
     end
 end
 
-n=Generator.nodes((8,8,4), Blocks.Tetraheder)
+n=Generator.nodes((8,8,4), Blocks.Tetraheder);
 
 function show_mesh(nodes)
     #Visually seeing that the coordinates are correct:
     fig = Figure()
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
-    scatter!(ax3d, [nodes[i].x for i = eachindex(nodes)],[nodes[i].y for i = eachindex(nodes)],[nodes[i].z for i = eachindex(nodes)], markersize = 10)
+    scatter!(ax3d, [key[1] for key in keys(nodes)], [key[2] for key in keys(nodes)], [key[3] for key in keys(nodes)], markersize = 10)
     display(fig)
-    transmission_lines = [(nodes[i].x, nodes[i].y, nodes[i].z, nodes[j].x, nodes[j].y, nodes[j].z) for i in eachindex(nodes) for j in nodes[i].neighbours]
+    transmission_lines = [(key[1], key[2], key[3], neighbour[1], neighbour[2], neighbour[3]) for key in keys(nodes) for neighbour in nodes[key].neighbours]
     for line in transmission_lines
         lines!(ax3d, [line[1], line[4]], [line[2], line[5]], [line[3], line[6]], color = :blue)
     end
