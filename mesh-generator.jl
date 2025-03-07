@@ -3,6 +3,7 @@
 #using FileIO
 using GLMakie
 using NearestNeighbors
+using FileIO
 
 module Blocks #Coordinates of a base block x,y,z
     # export Cartesian, Tetraheder
@@ -24,8 +25,10 @@ module Generator
     #Multithreading the process of multiplying the blocks?
     #Finding the neigbours by checkings what nodes are within a set radius
     mutable struct Node     #The node
-        #Neigbouring stuff, outgoing pressures, neighbouring nodes, etc. Might just be a placeholder
-        neighbours #::Vector{Int64}
+        neighbours::Vector{SVector{3, Float64}}
+        incoming::Vector{Any}#The indexes of the vectors correspond to the neighbours indexes
+        outgoing::Vector{Any}
+        on_node::Float64
     end;
 
     function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::Vector{Tuple{Int64, Int64, Int64}})
@@ -44,7 +47,7 @@ module Generator
         nodes = Dict()
         data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
         for coord in data
-            nodes[coord] = Node([])
+            nodes[coord] = Node([], [], [], 0.0)
         end
         #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
         kdtree = KDTree(data)
@@ -56,10 +59,10 @@ module Generator
     end
 end
 
-n=Generator.nodes((8,8,4), Blocks.Tetraheder);
+n=Generator.nodes((10,10,6), Blocks.Tetraheder);
 
-function show_mesh(nodes)
-    #Visually seeing that the coordinates are correct:
+#Visually seeing that the coordinates are correct:
+function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
     scatter!(ax3d, [key[1] for key in keys(nodes)], [key[2] for key in keys(nodes)], [key[3] for key in keys(nodes)], markersize = 10)
@@ -71,3 +74,4 @@ function show_mesh(nodes)
     return fig
 end
 f = show_mesh(n)
+
