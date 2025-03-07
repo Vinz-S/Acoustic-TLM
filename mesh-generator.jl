@@ -16,12 +16,14 @@ module Blocks #Coordinates of a base block x,y,z
     [(Tetraheder[i][1],Tetraheder[i][2]+2,Tetraheder[i][3]+2) for i = eachindex(Tetraheder)];
     [(Tetraheder[i][1]+2,Tetraheder[i][2],Tetraheder[i][3]+2) for i = eachindex(Tetraheder)];]
     unique!(Tetraheder) #clears duplicates
+    transmission_line_length = Dict("Cartesian"=>(1), "Tetraheder"=>(sqrt(1^2+1^2+1^2)))
+    crystal = Dict("Cartesian"=>Cartesian, "Tetraheder"=>Tetraheder)
 end
 
 module Generator
     using NearestNeighbors: KDTree, inrange
     using StaticArrays
-# import ..Blocks
+    import ..Blocks
     #Multithreading the process of multiplying the blocks?
     #Finding the neigbours by checkings what nodes are within a set radius
     mutable struct Node     #The node
@@ -31,8 +33,9 @@ module Generator
         on_node::Float64
     end;
 
-    function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::Vector{Tuple{Int64, Int64, Int64}})
-        transmission_line_length = sqrt(1^2+1^2+1^2)
+    function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String)
+        transmission_line_length = Blocks.transmission_line_length[crystal]
+        crystal = Blocks.crystal[crystal]
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
         for x = 1:ceil(dimensions[1]/crystal_size)
@@ -59,7 +62,7 @@ module Generator
     end
 end
 
-n=Generator.nodes((10,10,6), Blocks.Tetraheder);
+n=Generator.nodes((10,10,6), "Tetraheder");
 
 #Visually seeing that the coordinates are correct:
 function show_mesh(nodes) #This function is very slow on anything more than a few crystals
