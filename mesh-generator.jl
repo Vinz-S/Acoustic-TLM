@@ -33,8 +33,9 @@ module Generator
         on_node::Float64
     end;
 
-    function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String)
-        transmission_line_length = Blocks.transmission_line_length[crystal]
+    function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
+        scale = transmission_line_length/Blocks.transmission_line_length[crystal]
+        transmission_line_length = scale*Blocks.transmission_line_length[crystal]
         crystal = Blocks.crystal[crystal]
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
@@ -42,7 +43,7 @@ module Generator
             for y = 1:ceil(dimensions[2]/crystal_size)
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
-                        push!(coordinates, (crystal[i][1]+(x-1)*crystal_size, crystal[i][2]+(y-1)*crystal_size, crystal[i][3]+(z-1)*crystal_size))
+                        push!(coordinates, (scale*(crystal[i][1]+(x-1)*crystal_size), scale*(crystal[i][2]+(y-1)*crystal_size), scale*(crystal[i][3]+(z-1)*crystal_size)))
                     end
                 end
             end
@@ -54,7 +55,7 @@ module Generator
         end
         #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
         kdtree = KDTree(data)
-        for key in keys(nodes)
+        for key in keys(nodes) #0.01 margin added to the transmission line length to make up for rounding errors
             neighbours = [data[index] for index in inrange(kdtree, key, transmission_line_length+0.01)]
             nodes[key].neighbours = filter!(v->v!=key,neighbours)
         end
@@ -62,7 +63,9 @@ module Generator
     end
 end
 
-n=Generator.nodes((10,10,6), "Tetraheder");
+
+###Testing the modules
+n=Generator.nodes((10,10,6), "Tetraheder", 15.0);
 
 #Visually seeing that the coordinates are correct:
 function show_mesh(nodes) #This function is very slow on anything more than a few crystals
