@@ -32,19 +32,21 @@ module Generator
         outgoing::Vector{Any}
         on_node::Float64
     end;
-
+    function scale_crystal(crystal::Vector{Tuple{Int64, Int64, Int64}}, scale::Float64)
+        return [(scale*crystal[i][1], scale*crystal[i][2], scale*crystal[i][3]) for i = eachindex(crystal)]
+    end
+    
     function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
         scale = transmission_line_length/Blocks.transmission_line_length[crystal]
         transmission_line_length = scale*Blocks.transmission_line_length[crystal]
-        crystal = Blocks.crystal[crystal]
+        crystal = scale_crystal(Blocks.crystal[crystal], scale)
         coordinates = Set()
-        crystal_size = findmax(crystal[findmax(crystal)[2]])[1]*scale
-        display(crystal_size)
+        crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
         for x = 1:ceil(dimensions[1]/crystal_size)
             for y = 1:ceil(dimensions[2]/crystal_size)
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
-                        push!(coordinates, ((scale*crystal[i][1]+(x-1)*crystal_size), (scale*crystal[i][2]+(y-1)*crystal_size), (scale*crystal[i][3]+(z-1)*crystal_size)))
+                        push!(coordinates, ((crystal[i][1]+(x-1)*crystal_size), (crystal[i][2]+(y-1)*crystal_size), (crystal[i][3]+(z-1)*crystal_size)))
                     end
                 end
             end
@@ -66,7 +68,7 @@ end
 
 
 ###Testing the modules
-n=Generator.nodes((3,3,2), "Tetraheder", 0.5);
+@time n=Generator.nodes((500,500,300), "Tetraheder", 2.0);
 
 #Visually seeing that the coordinates are correct:
 function show_mesh(nodes) #This function is very slow on anything more than a few crystals
