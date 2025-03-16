@@ -1,9 +1,6 @@
 ###This file is supposed to conatain the module for the pre-processo
-#using JLD2
-#using FileIO
 using GLMakie
 using NearestNeighbors
-using FileIO
 
 module Blocks #Coordinates of a base block x,y,z
     # export Cartesian, Tetraheder
@@ -66,10 +63,27 @@ module Generator
     end
 end
 
+module saving_dicts
+    using JLD2
+    using FileIO
+    function to_text(dictionary::Dict{Any, Any}, filename::String)
+        f = open(filename*".txt", "w")
+        print(f, typeof(dictionary), "\n")
+        for key in keys(dictionary)
+            print(f, key, "=>", dictionary[key], "\n")
+        end
+        close(f)
+    end
+
+    function to_jld2(dictionary::Dict{Any, Any}, filename::String) #Is loaded using load("filename.jld2", "nodes")
+        save(filename*".jld2", "nodes", dictionary)
+    end
+end
 
 ###Testing the modules
-@time n=Generator.nodes((500,500,300), "Tetraheder", 2.0);
-
+@time n=Generator.nodes((8,8,6), "Tetraheder", 2.0);
+saving_dicts.to_text(n, "demo")
+saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2", "nodes"))
 #Visually seeing that the coordinates are correct:
 function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
@@ -82,5 +96,6 @@ function show_mesh(nodes) #This function is very slow on anything more than a fe
     end
     return fig
 end
+
 f = show_mesh(n)
 
