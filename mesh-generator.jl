@@ -24,6 +24,9 @@ module Generator
     #Multithreading the process of multiplying the blocks?
     #Finding the neigbours by checkings what nodes are within a set radius
     mutable struct Node     #The node
+        x::Float64 #Coordinates of the node
+        y::Float64
+        z::Float64
         neighbours::Vector{SVector{3, Float64}}
         incoming::Vector{Any}#The indexes of the vectors correspond to the neighbours indexes
         outgoing::Vector{Any}
@@ -50,14 +53,15 @@ module Generator
         end
         nodes = Dict()
         data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
-        for coord in data
-            nodes[coord] = Node([], [], [], 0.0)
+
+        for (i, coord) in enumerate(coordinates)
+            nodes[i] = Node(coord[1], coord[2], coord[3], [], [], [], 0.0)
         end
         #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
         kdtree = KDTree(data)
         for key in keys(nodes) #0.01 margin added to the transmission line length to make up for rounding errors
-            neighbours = [data[index] for index in inrange(kdtree, key, transmission_line_length+0.01)]
-            nodes[key].neighbours = filter!(v->v!=key,neighbours)
+            neighbours = [data[index] for index in inrange(kdtree, data[key], transmission_line_length+0.01)]
+            nodes[key].neighbours = filter!(v->v!=key, neighbours)
         end
         return nodes
     end
