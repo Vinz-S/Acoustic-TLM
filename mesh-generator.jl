@@ -15,6 +15,7 @@ module Blocks #Coordinates of a base block x,y,z
     unique!(Tetraheder) #clears duplicates
     transmission_line_length = Dict("Cartesian"=>(1), "Tetraheder"=>(sqrt(1^2+1^2+1^2)))
     crystal = Dict("Cartesian"=>Cartesian, "Tetraheder"=>Tetraheder)
+    no_branches = Dict("Cartesian"=>6, "Tetraheder"=>4) #number of branches on each node
 end
 
 module Generator
@@ -62,6 +63,14 @@ module Generator
         for key in keys(nodes) #0.01 margin added to the transmission line length to make up for rounding errors
             neighbours = [index for index in inrange(kdtree, data[key], transmission_line_length+0.01)]
             nodes[key].neighbours = filter!(v->v!=key, neighbours)
+        end
+        for key in keys(nodes)
+            if length(nodes[key].neighbours) < Blocks.no_branches[crystal]
+                for i = (length(nodes[key].neighbours)+1):Blocks.no_branches[crystal]
+                    #uses 0 as placeholders to create the correct number of branches where neighbours are missing
+                    push!(nodes[key].neighbours, 0)
+                end
+            end
         end
         return nodes, kdtree
     end
