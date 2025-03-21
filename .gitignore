@@ -1,2 +1,4 @@
 testing.jl
 *.png
+*.jld2
+*.txt
