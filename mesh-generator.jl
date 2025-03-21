@@ -27,9 +27,9 @@ module Generator
         x::Float64 #Coordinates of the node
         y::Float64
         z::Float64
-        neighbours::Vector{SVector{3, Float64}}
-        incoming::Vector{Any}#The indexes of the vectors correspond to the neighbours indexes
-        outgoing::Vector{Any}
+        neighbours::Vector{Int64}
+        inbound::Vector{Any}#The indexes of the vectors correspond to the neighbours indexes
+        outbound::Vector{Any}
         on_node::Float64
     end;
     function scale_crystal(crystal::Vector{Tuple{Int64, Int64, Int64}}, scale::Float64)
@@ -60,14 +60,14 @@ module Generator
         #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
         kdtree = KDTree(data)
         for key in keys(nodes) #0.01 margin added to the transmission line length to make up for rounding errors
-            neighbours = [data[index] for index in inrange(kdtree, data[key], transmission_line_length+0.01)]
+            neighbours = [index for index in inrange(kdtree, data[key], transmission_line_length+0.01)]
             nodes[key].neighbours = filter!(v->v!=key, neighbours)
         end
-        return nodes
+        return nodes, kdtree
     end
 end
 
-module saving_dicts
+module Saving_dicts
     using JLD2
     using FileIO
     function to_text(dictionary::Dict{Any, Any}, filename::String)
