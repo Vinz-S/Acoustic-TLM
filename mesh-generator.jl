@@ -40,6 +40,7 @@ module Generator
     function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
         scale = transmission_line_length/Blocks.transmission_line_length[crystal]
         transmission_line_length = scale*Blocks.transmission_line_length[crystal]
+        no_branches = Blocks.no_branches[crystal]
         crystal = scale_crystal(Blocks.crystal[crystal], scale)
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
@@ -50,6 +51,11 @@ module Generator
                         push!(coordinates, ((crystal[i][1]+(x-1)*crystal_size), (crystal[i][2]+(y-1)*crystal_size), (crystal[i][3]+(z-1)*crystal_size)))
                     end
                 end
+            end
+        end
+        for coord in coordinates
+            if coord[1] > dimensions[1] || coord[2] > dimensions[2] || coord[3] > dimensions[3]
+                pop!(coordinates, coord)
             end
         end
         nodes = Dict()
@@ -65,8 +71,8 @@ module Generator
             nodes[key].neighbours = filter!(v->v!=key, neighbours)
         end
         for key in keys(nodes)
-            if length(nodes[key].neighbours) < Blocks.no_branches[crystal]
-                for i = (length(nodes[key].neighbours)+1):Blocks.no_branches[crystal]
+            if length(nodes[key].neighbours) < no_branches
+                for i = (length(nodes[key].neighbours)+1):no_branches
                     #uses 0 as placeholders to create the correct number of branches where neighbours are missing
                     push!(nodes[key].neighbours, 0)
                 end
