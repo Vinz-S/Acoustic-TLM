@@ -29,8 +29,8 @@ module Generator
         y::Float64
         z::Float64
         neighbours::Vector{Int64}
-        inbound::Vector{Any}#The indexes of the vectors correspond to the neighbours indexes
-        outbound::Vector{Any}
+        inbound::Vector{Float64}#The indexes of the vectors correspond to the neighbours indexes
+        outbound::Vector{Float64}
         on_node::Float64
     end;
     function scale_crystal(crystal::Vector{Tuple{Int64, Int64, Int64}}, scale::Float64)
@@ -38,17 +38,21 @@ module Generator
     end
     
     function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
+        #The largest possible rectangle within the chosen dimensions will be generated
         scale = transmission_line_length/Blocks.transmission_line_length[crystal]
         transmission_line_length = scale*Blocks.transmission_line_length[crystal]
         no_branches = Blocks.no_branches[crystal]
         crystal = scale_crystal(Blocks.crystal[crystal], scale)
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
+        accuracy = 14
         for x = 1:ceil(dimensions[1]/crystal_size)
             for y = 1:ceil(dimensions[2]/crystal_size)
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
-                        push!(coordinates, ((crystal[i][1]+(x-1)*crystal_size), (crystal[i][2]+(y-1)*crystal_size), (crystal[i][3]+(z-1)*crystal_size)))
+                        push!(coordinates, (round(crystal[i][1]+(x-1)*crystal_size, sigdigits=accuracy), 
+                                            round(crystal[i][2]+(y-1)*crystal_size, sigdigits=accuracy), 
+                                            round(crystal[i][3]+(z-1)*crystal_size, sigdigits=accuracy)))
                     end
                 end
             end
@@ -59,10 +63,11 @@ module Generator
             end
         end
         nodes = Dict()
+        #Accuracy is reduced to 15 significant digits to mitigate rounding errors, earlier prints showed an original accuracy of 17
         data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
 
         for (i, coord) in enumerate(coordinates)
-            nodes[i] = Node(coord[1], coord[2], coord[3], [], [], [], 0.0)
+            nodes[i] = Node(coord[1], coord[2], coord[3], zeros(Int64, no_branches), zeros(no_branches), zeros(no_branches), 0.0)
         end
         #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
         kdtree = KDTree(data)
@@ -71,6 +76,9 @@ module Generator
             nodes[key].neighbours = filter!(v->v!=key, neighbours)
         end
         for key in keys(nodes)
+            if length(nodes[key].neighbours) > no_branches
+                throw(ErrorException("The number of neighbours is larger than the number of branches, adjusting the rounding in lines 52-54 might help, current: "*string(accuracy)))
+            end
             if length(nodes[key].neighbours) < no_branches
                 for i = (length(nodes[key].neighbours)+1):no_branches
                     #uses 0 as placeholders to create the correct number of branches where neighbours are missing
