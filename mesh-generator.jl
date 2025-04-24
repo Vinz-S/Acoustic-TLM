@@ -29,7 +29,7 @@ module Generator
         y::Float64
         z::Float64
         neighbours::Vector{Int64}
-        inbound::Vector{Float64}#The indexes of the vectors correspond to the neighbours indexes
+        inbound::Vector{Float64} #The indexes of the vectors correspond to the neighbours indexes
         outbound::Vector{Float64}
         on_node::Float64
     end;
@@ -37,7 +37,7 @@ module Generator
         return [(scale*crystal[i][1], scale*crystal[i][2], scale*crystal[i][3]) for i = eachindex(crystal)]
     end
     
-    function nodes(dimensions::Tuple{Int64, Int64, Int64}, crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
+    function nodes(dimensions::Tuple{Float64, Float64, Float64}; crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
         #The largest possible rectangle within the chosen dimensions will be generated
         scale = transmission_line_length/Blocks.transmission_line_length[crystal]
         transmission_line_length = scale*Blocks.transmission_line_length[crystal]
@@ -50,6 +50,7 @@ module Generator
             for y = 1:ceil(dimensions[2]/crystal_size)
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
+                        #Accuracy is reduced to mitigate rounding errors, earlier prints showed an original accuracy of 17 digits
                         push!(coordinates, (round(crystal[i][1]+(x-1)*crystal_size, sigdigits=accuracy), 
                                             round(crystal[i][2]+(y-1)*crystal_size, sigdigits=accuracy), 
                                             round(crystal[i][3]+(z-1)*crystal_size, sigdigits=accuracy)))
@@ -63,7 +64,6 @@ module Generator
             end
         end
         nodes = Dict()
-        #Accuracy is reduced to 15 significant digits to mitigate rounding errors, earlier prints showed an original accuracy of 17
         data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
 
         for (i, coord) in enumerate(coordinates)

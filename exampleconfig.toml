@@ -1,0 +1,23 @@
+#Configuration file example, following TOML
+c = 343
+duration = 20 #in seconds
+[mesh]
+type = "Tetraheder"
+	[mesh.dimensions]
+	x = 25.0
+	y = 25.0
+	z = 20.0
+	tll = 1.0
+[surfaces]
+name = ["reflecting", "transmitting"]
+r_factor = [1, 0]
+[sources]
+x = [2,1,1]
+y = [6,1,2]
+z = [2,1,3]
+amp = [2, 4, 1]
+freq = [1, 1, 3] #kHz
+type = ["sine", "dirac", "sine"]
+[measurements]
+points = []
+
