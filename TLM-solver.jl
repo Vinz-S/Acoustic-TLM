@@ -10,7 +10,7 @@ include("mesh-generator.jl")
             kdtree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys])
         end
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
-        println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
+        #println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
         push!(sine_sources, [indexes[1], amplitude, frequency])
     end
     function generate_dirac(nodes, position, kdtree = nothing; amplitude = 1)

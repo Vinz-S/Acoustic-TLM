@@ -45,6 +45,7 @@ module Visualization
         N = length(signal)
         F = 2/N*abs.(fftshift(fft(signal))) #frequency axis
         freqs = fftshift(fftfreq(N,fs)) #amplitude axis
+        return F, freqs
     end
 
 end

@@ -3,6 +3,7 @@ include("TLM-solver.jl")
 using TOML
 using JLD2
 using FileIO
+using StaticArrays
 #flow:
 #extract data from config file
 config_name = "exampleconfig"
@@ -28,11 +29,8 @@ else
 end
 
 #generate sources
-sources = configs["sourcess"]
+sources = configs["sources"]
 for i in eachindex(sources["x"])
-    display(sources["x"])
-    display(i)
-    display(sources["type"][i])
     if sources["type"][i] == "sine"
         Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i], frequency = sources["freq"][i])
@@ -43,14 +41,30 @@ for i in eachindex(sources["x"])
         error("Unknown source type: "*sources["type"][i])
     end
 end
-#set up measuring points
-measurement_points = 
+
+#set up measurenents
+mic_configs = configs["measurements"]["microphones"]
+measurement_points = [SVector{3,Int64}(mic_configs["x"][i], mic_configs["y"][i], mic_configs["z"][i]) for i in eachindex(mic_configs["x"])]
+for point in measurement_points
+    if point[1] > configs["mesh"]["dimensions"]["x"] || point[2] > configs["mesh"]["dimensions"]["y"] || point[3] > configs["mesh"]["dimensions"]["z"]
+        println("Measurement point out of bounds: "*string(point))
+        filter!(v->v!=point, measurement_points)
+    end
+end
+measurement_points = [i[1] for i in knn(tree, measurement_points, 1)[1]] #finds the closest node to the measurement point
+measurements = [[] for i in eachindex(measurement_points)] # The pressure values are saved here
 #run simulation
-it_time = c/tll #time per iteration
-its = ceil(configs["duration"]/it_time) #number of iterations
+it_time = tll/c #time per iteration
+its = 0:ceil(configs["duration"]/it_time) #iterations
 wavelengths = [c/freq for freq in sources["freq"]] #wavelength
 wtll = (wavelengths.^-1).*tll #tll in wavelengths
-#extract measurements
+
+for i in its
+    Solver.update_tlm!(mesh, i*it_time, reflection_factor = 1) #configs["reflection"]["factor"])
+    for j in eachindex(measurement_points)
+        push!(measurements[j], mesh[measurement_points[j]].on_node)
+    end
+end
 
 #fourier transform measurements
 #plot results
