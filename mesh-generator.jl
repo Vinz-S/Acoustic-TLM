@@ -93,6 +93,7 @@ end
 module Saving_dicts
     using JLD2
     using FileIO
+    using NearestNeighbors
     function to_text(dictionary::Dict{Any, Any}, filename::String)
         f = open(filename*".txt", "w")
         print(f, typeof(dictionary), "\n")
@@ -102,8 +103,8 @@ module Saving_dicts
         close(f)
     end
 
-    function to_jld2(dictionary::Dict{Any, Any}, filename::String) #Is loaded using load("filename.jld2", "nodes")
-        save(filename*".jld2", "nodes", dictionary)
+    function to_jld2(dictionary::Dict{Any, Any}, tree::KDTree, filename::String) #Is loaded using load("filename.jld2", "nodes")
+        save(filename*".jld2", "nodes", (dictionary, tree))
     end
 end
 

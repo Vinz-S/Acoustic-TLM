@@ -2,6 +2,7 @@
 c = 343
 duration = 20 #in seconds
 [mesh]
+filename = "example" #.jld2 added by script
 type = "Tetraheder"
 	[mesh.dimensions]
 	x = 25.0
