@@ -1,9 +1,11 @@
 include("mesh-generator.jl")
 include("TLM-solver.jl")
+include("post.jl")
 using TOML
 using JLD2
 using FileIO
 using StaticArrays
+using ProgressBars
 #flow:
 #extract data from config file
 config_name = "exampleconfig"
@@ -12,6 +14,7 @@ c = configs["c"]
 
 #creating/loading mesh_file
 mesh_file = configs["mesh"]["filename"]
+tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
 #This implementation might be prone to human error if different setups keep the same filenames
 if isfile(mesh_file*".jld2")
     println("Loading mesh from file: ", mesh_file*".jld2")
@@ -20,7 +23,6 @@ else
     println("Generating new mesh and saving to file: ", mesh_file*".jld2")
     #generate mesh
     mconf = configs["mesh"]
-    tll = mconf["dimensions"]["tll"] #transmission line length
     mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
                         crystal = mconf["type"], transmission_line_length = tll)
     #save mesh
@@ -55,7 +57,7 @@ measurement_points = [i[1] for i in knn(tree, measurement_points, 1)[1]] #finds 
 measurements = [[] for i in eachindex(measurement_points)] # The pressure values are saved here
 #run simulation
 it_time = tll/c #time per iteration
-its = 0:ceil(configs["duration"]/it_time) #iterations
+its = ProgressBar(0:ceil(configs["duration"]/it_time)) #iterations
 wavelengths = [c/freq for freq in sources["freq"]] #wavelength
 wtll = (wavelengths.^-1).*tll #tll in wavelengths
 
@@ -67,5 +69,6 @@ for i in its
 end
 
 #fourier transform measurements
+
 #plot results
 #save results

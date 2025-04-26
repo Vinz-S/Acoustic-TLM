@@ -1,8 +1,6 @@
 module Visualization
     using GLMakie
     using NearestNeighbors
-    using DataStructures
-    using FFTW
     function show_mesh(nodes) #This function is very slow on anything more than a few crystals
         fig = Figure()
         ax3d = Axis3(fig[1,1], title = "grid Visualization")
@@ -25,6 +23,11 @@ module Visualization
             #calculate average here, trilinear interpolation? https://en.wikipedia.org/wiki/Multivariate_interpolation#Irregular_grid_(scattered_data)
             #use average as it shold be sufficient for fine grids
     end
+end
+
+module Analysis
+    using DataStructures
+    using FFTW
     function analytic_cubic_resonance(x, y, z, c)
         resonances =  SortedDict{Float64, Vector{String}}()
         for l = 0:3, m = 0:3, n = 0:3
@@ -47,6 +50,5 @@ module Visualization
         freqs = fftshift(fftfreq(N,fs)) #amplitude axis
         return F, freqs
     end
-
 end
-rs = Visualization.analytic_cubic_resonance(2, 2.5, 6, 343)
+rs = Analysis.analytic_cubic_resonance(2, 2.5, 6, 343)
