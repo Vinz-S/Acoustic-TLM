@@ -45,10 +45,8 @@ module Analysis
         return resonances #have them in a dataframe?
     end
     function signal_frequencies(signal, fs)
-        N = length(signal)
-        F = 2/N*abs.(fftshift(fft(signal))) #frequency axis
-        freqs = fftshift(fftfreq(N,fs)) #amplitude axis
-        return F, freqs
+        F = fftshift(fft(signal))
+        freqs =  fftshift(fftfreq(length(signal), fs))
+        return freqs, F
     end
 end
-rs = Analysis.analytic_cubic_resonance(2, 2.5, 6, 343)

@@ -68,7 +68,6 @@ for i in its
     end
 end
 
-#fourier transform measurements
-
-#plot results
 #save results
+save(configs["measurements"]["filename"]*".jld2", "measurements", measurements)
+#further analysis done after importing data in a new script

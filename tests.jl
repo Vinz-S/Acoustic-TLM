@@ -1,11 +1,11 @@
 #This file is written with the intention of testing different modules and functions
 include("mesh-generator.jl")
 include("TLM-solver.jl")
-
+include("post.jl")
 ###Testing the modules
 @time n, tree = Generator.nodes((4,4,3));
-Saving_dicts.to_text(n, "demo")
-Saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2", "nodes"))
+#= Saving_dicts.to_text(n, "demo")
+Saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2", "nodes")) =#
 #Visually seeing that the coordinates are correct:
 function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()

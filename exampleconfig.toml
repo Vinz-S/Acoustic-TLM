@@ -20,6 +20,7 @@ amp = [2, 4, 1]
 freq = [1, 1, 3] #kHz
 type = ["sine", "dirac", "sine"]
 [measurements]
+filename = "example" #.jld2 added by script
 	[measurements.microphones]
 	x = [5, 10]
 	y = [5, 10]
