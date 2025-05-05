@@ -10,12 +10,12 @@ stem!(ax, freqs, abs.(F), markersize = 10) =#
 
 ###First resonance test
 config_name = "Resonances"
-configs = TOML.parsefile(config_name*".toml")
+configs = TOML.parsefile("configs/"*config_name*".toml")
 dimensions = configs["mesh"]["dimensions"]["x"], configs["mesh"]["dimensions"]["y"], configs["mesh"]["dimensions"]["z"]
 
 modes = Analysis.analytic_cubic_resonance(dimensions[1], dimensions[2], dimensions[3], configs["c"])
 
-measurements = load(configs["measurements"]["filename"]*".jld2", "measurements")
+measurements = load("results/"*configs["measurements"]["filename"]*".jld2", "measurements")
 it_time = configs["mesh"]["dimensions"]["tll"]/configs["c"] #time per iteration
 nyquist = configs["c"]/(2*configs["mesh"]["dimensions"]["tll"])
 freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[1][Int(length(measurements[1])/2):Int(length(measurements[1]))]), 2*nyquist) #test with the first measurement point

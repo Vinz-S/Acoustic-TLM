@@ -8,26 +8,26 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config file
-config_name = "Resonances" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
-configs = TOML.parsefile(config_name*".toml")
+config_name = "exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+configs = TOML.parsefile("configs/"*config_name*".toml")
 c = configs["c"]
 
 #creating/loading mesh_file
 mesh_file = configs["mesh"]["filename"]
 tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
 #This implementation might be prone to human error if different setups keep the same filenames
-if isfile(mesh_file*".jld2")
-    println("Loading mesh from file: ", mesh_file*".jld2")
-    mesh, tree = load(mesh_file*".jld2", "nodes")
+if isfile("meshes/"*mesh_file*".jld2")
+    println("Loading mesh from file: ", "meshes/"*mesh_file*".jld2")
+    mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
 else
-    println("Generating new mesh and saving to file: ", mesh_file*".jld2")
+    println("Generating new mesh and saving to file: ", "meshes/"*mesh_file*".jld2")
     #generate mesh
     mconf = configs["mesh"]
     mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
                         crystal = mconf["type"], transmission_line_length = tll)
     #save mesh
-    Saving_dicts.to_jld2(mesh, tree, mesh_file)
-    mesh, tree = load(mesh_file*".jld2", "nodes")
+    Saving_dicts.to_jld2(mesh, tree, "meshes/"*mesh_file)
+    mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
 end
 
 #generate sources
@@ -70,5 +70,5 @@ for i in its
 end
 
 #save results
-save(configs["measurements"]["filename"]*".jld2", "measurements", measurements)
+save("results/"*configs["measurements"]["filename"]*".jld2", "measurements", measurements)
 #further analysis done after importing data in a new script
