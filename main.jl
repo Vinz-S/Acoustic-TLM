@@ -8,7 +8,7 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config file
-config_name = "exampleconfig"
+config_name = "Resonances" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile(config_name*".toml")
 c = configs["c"]
 
@@ -57,7 +57,8 @@ measurement_points = [i[1] for i in knn(tree, measurement_points, 1)[1]] #finds 
 measurements = [[] for i in eachindex(measurement_points)] # The pressure values are saved here
 #run simulation
 it_time = tll/c #time per iteration
-its = ProgressBar(0:ceil(configs["duration"]/it_time)) #iterations
+#Beginning from 0 creates an adittional bugged progressbar, workaround not found so far
+its = ProgressBar(0:ceil(configs["duration"]/it_time)+1) #iterations
 wavelengths = [c/freq for freq in sources["freq"]] #wavelength
 wtll = (wavelengths.^-1).*tll #tll in wavelengths
 

@@ -108,3 +108,14 @@ module Saving_dicts
     end
 end
 
+module SetupCalculations
+    #A function to calculate the correct transmssion-line length for a given resolution
+    function tllByResolution(ppwl::Float64, c, frequency::Float64)
+        #ppwl = points per wavelength, how many transmission-line lengths go into one wavelength
+        #tll = transmission line length
+        #c = speed of sound
+        wavelength = c/frequency
+        tll = wavelength/ppwl
+        return tll
+    end
+end

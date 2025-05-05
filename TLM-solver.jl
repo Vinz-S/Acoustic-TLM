@@ -46,6 +46,7 @@ include("mesh-generator.jl")
         end
         timestamp != 0 ? nothing : for source in dirac_sources
             nodes[source[1]].on_node += source[2]
+            println("Iteration 0 run")
         end
     end
     function outbound!(nodes)
