@@ -34,8 +34,13 @@ end
 sources = configs["sources"]
 for i in eachindex(sources["x"])
     if sources["type"][i] == "sine"
-        Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
+        if @isdefined(sources["iterations"])
+            Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
+                         amplitude = sources["amp"][i], frequency = sources["freq"][i], periods = sources["periods"][i])
+        else
+            Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i], frequency = sources["freq"][i])
+        end
     elseif sources["type"][i] == "dirac"
         Solver.generate_dirac(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i])
