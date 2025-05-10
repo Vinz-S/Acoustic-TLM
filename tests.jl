@@ -3,11 +3,11 @@ include("mesh-generator.jl")
 include("TLM-solver.jl")
 include("post.jl")
 ###Testing the modules
-@time n, tree = Generator.nodes((50.0,50.0,40.0));
+@time n, tree = Generator.nodes((8.0,8.0,6.0); crystal = "Tetraheder", transmission_line_length = sqrt(3));
 #= Saving_dicts.to_text(n, "demo")
 Saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2", "nodes")) =#
 #Visually seeing that the coordinates are correct:
-#= function show_mesh(nodes) #This function is very slow on anything more than a few crystals
+function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
     scatter!(ax3d, [node.x for node in values(nodes)], [node.y for node in values(nodes)], [node.z for node in values(nodes)], markersize = 10)
@@ -19,7 +19,7 @@ Saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2
     return fig
 end
 
-f = show_mesh(n) =#
+f = show_mesh(n)
 
 #= for key in keys(n)
     n[key].outbound = [i[1] for i = enumerate(n[key].neighbours)]
@@ -28,7 +28,7 @@ end=#
 #Solver.inbound(n, 4)
 
 ### Visually checking wave propagation
-using GLMakie
+#= using GLMakie
 Solver.generate_dirac(n, (25, 25, 0), tree, amplitude = 25)
 
 points = [Point3f(node.x, node.y, node.z) for node in values(n)]
@@ -44,4 +44,4 @@ record(fig, "lorenz.mp4", 0:iterations) do frame #default frame rate is 24 fps
     Solver.update_tlm!(n, frame/24, reflection_factor = 1) #might want to get a variable for the frame rate
     pressures[] = [node.on_node for node in values(n)]
     ax.azimuth[] = 1.7pi + 0.3 * sin(2pi * frame / 120)
-end
+end =#

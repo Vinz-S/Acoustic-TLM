@@ -7,8 +7,8 @@ using FileIO
 using StaticArrays
 using ProgressBars
 #flow:
-#extract data from config file
-config_name = "exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+#extract data from config filegp
+config_name = "prop_test_cart_20" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile("configs/"*config_name*".toml")
 c = configs["c"]
 
@@ -26,15 +26,18 @@ else
     mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
                         crystal = mconf["type"], transmission_line_length = tll)
     #save mesh
+    println("Saving mesh to file")
     Saving_dicts.to_jld2(mesh, tree, "meshes/"*mesh_file)
     mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
 end
+println("Mesh loaded, size: ", length(mesh), " nodes")
 
 #generate sources
 sources = configs["sources"]
-for i in eachindex(sources["x"])
+iter = ProgressBar(eachindex(sources["x"]))
+for i in iter
     if sources["type"][i] == "sine"
-        if @isdefined(sources["iterations"])
+        if haskey(sources, "iterations")
             Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i], frequency = sources["freq"][i], periods = sources["periods"][i])
         else
@@ -47,16 +50,20 @@ for i in eachindex(sources["x"])
     else
         error("Unknown source type: "*sources["type"][i])
     end
+    set_description(iter, "Generating sources: ")
 end
 
 #set up measurenents
 mic_configs = configs["measurements"]["microphones"]
-measurement_points = [SVector{3,Int64}(mic_configs["x"][i], mic_configs["y"][i], mic_configs["z"][i]) for i in eachindex(mic_configs["x"])]
+measurement_points = [SVector{3,Float64}(mic_configs["x"][i], mic_configs["y"][i], mic_configs["z"][i]) for i in eachindex(mic_configs["x"])]
+pbar = ProgressBar(length(measurement_points))
 for point in measurement_points
     if point[1] > configs["mesh"]["dimensions"]["x"] || point[2] > configs["mesh"]["dimensions"]["y"] || point[3] > configs["mesh"]["dimensions"]["z"]
         println("Measurement point out of bounds: "*string(point))
         filter!(v->v!=point, measurement_points)
     end
+    update(pbar)
+    set_description(pbar, "Setting up measurement points: ")
 end
 measurement_points = [i[1] for i in knn(tree, measurement_points, 1)[1]] #finds the closest node to the measurement point
 measurements = [[] for i in eachindex(measurement_points)] # The pressure values are saved here
@@ -66,14 +73,15 @@ it_time = tll/c #time per iteration
 its = ProgressBar(0:ceil(configs["duration"]/it_time)+1) #iterations
 wavelengths = [c/freq for freq in sources["freq"]] #wavelength
 wtll = (wavelengths.^-1).*tll #tll in wavelengths
-
+@time begin
 for i in its
     Solver.update_tlm!(mesh, i*it_time, reflection_factor = 1) #configs["reflection"]["factor"])
     for j in eachindex(measurement_points)
         push!(measurements[j], mesh[measurement_points[j]].on_node)
     end
+    set_description(its, "Running simulation: ")
 end
-
+end
 #save results
 save("results/"*configs["measurements"]["filename"]*".jld2", "measurements", measurements)
 #further analysis done after importing data in a new script

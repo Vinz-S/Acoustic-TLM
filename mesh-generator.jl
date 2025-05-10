@@ -70,6 +70,7 @@ module Generator
             set_description(pbar, "Filtering coordinate duplicates: ")
         end
         nodes = Dict()
+        println("Restructuring coordinates")
         data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
         pbar = ProgressBar(total = length(coordinates))
         for (i, coord) in enumerate(coordinates)
@@ -81,7 +82,7 @@ module Generator
         kdtree = KDTree(data)
         pbar = ProgressBar(total = length(nodes))
         for key in keys(nodes) #0.01 margin added to the transmission line length to make up for rounding errors
-            neighbours = [index for index in inrange(kdtree, data[key], transmission_line_length+0.01)]
+            neighbours = [index for index in inrange(kdtree, data[key], transmission_line_length*1.01)]
             nodes[key].neighbours = filter!(v->v!=key, neighbours)
             update(pbar)
             set_description(pbar, "Finding node neighbours: ")
@@ -89,6 +90,7 @@ module Generator
         pbar = ProgressBar(total = length(nodes))
         for key in keys(nodes)
             if length(nodes[key].neighbours) > no_branches
+                display(nodes[key])
                 throw(ErrorException("The number of neighbours is larger than the number of branches, adjusting the rounding in lines 52-54 might help, current: "*string(accuracy)))
             end
             if length(nodes[key].neighbours) < no_branches
