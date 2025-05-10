@@ -21,6 +21,7 @@ end
 module Generator
     using NearestNeighbors: KDTree, inrange
     using StaticArrays
+    using ProgressBars
     import ..Blocks
     #Multithreading the process of multiplying the blocks?
     #Finding the neigbours by checkings what nodes are within a set radius
@@ -46,7 +47,8 @@ module Generator
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
         accuracy = 14
-        for x = 1:ceil(dimensions[1]/crystal_size)
+        iter = ProgressBar(1:ceil(dimensions[1]/crystal_size))
+        for x = iter
             for y = 1:ceil(dimensions[2]/crystal_size)
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
@@ -57,24 +59,34 @@ module Generator
                     end
                 end
             end
+            set_description(iter, "Generating node coordinates: ")
         end
+        pbar = ProgressBar(total = length(coordinates))
         for coord in coordinates
             if coord[1] > dimensions[1] || coord[2] > dimensions[2] || coord[3] > dimensions[3]
                 pop!(coordinates, coord)
             end
+            update(pbar)
+            set_description(pbar, "Filtering coordinate duplicates: ")
         end
         nodes = Dict()
         data::Vector{SVector{3, Float64}} = [[coord[1], coord[2], coord[3]] for coord in coordinates]
-
+        pbar = ProgressBar(total = length(coordinates))
         for (i, coord) in enumerate(coordinates)
             nodes[i] = Node(coord[1], coord[2], coord[3], zeros(Int64, no_branches), zeros(no_branches), zeros(no_branches), 0.0)
+            update(pbar)
+            set_description(pbar, "Generating nodes: ")
         end
         #The indexes of the nodes in the KDTree are the same as the indexes of the coordinates in the data vector
         kdtree = KDTree(data)
+        pbar = ProgressBar(total = length(nodes))
         for key in keys(nodes) #0.01 margin added to the transmission line length to make up for rounding errors
             neighbours = [index for index in inrange(kdtree, data[key], transmission_line_length+0.01)]
             nodes[key].neighbours = filter!(v->v!=key, neighbours)
+            update(pbar)
+            set_description(pbar, "Finding node neighbours: ")
         end
+        pbar = ProgressBar(total = length(nodes))
         for key in keys(nodes)
             if length(nodes[key].neighbours) > no_branches
                 throw(ErrorException("The number of neighbours is larger than the number of branches, adjusting the rounding in lines 52-54 might help, current: "*string(accuracy)))
@@ -85,6 +97,8 @@ module Generator
                     push!(nodes[key].neighbours, 0)
                 end
             end
+            update(pbar)
+            set_description(pbar, "Filling boundaries into nodes: ")
         end
         return nodes, kdtree
     end
@@ -110,12 +124,12 @@ end
 
 module SetupCalculations
     #A function to calculate the correct transmssion-line length for a given resolution
-    function tllByResolution(ppwl::Float64, c, frequency::Float64)
-        #ppwl = points per wavelength, how many transmission-line lengths go into one wavelength
+    function tllByResolution(Δl, c, frequency)
+        #Δl = points per wavelength, how many transmission-line lengths go into one wavelength
         #tll = transmission line length
         #c = speed of sound
         wavelength = c/frequency
-        tll = wavelength/ppwl
+        tll = wavelength/Δl
         return tll
     end
 end
