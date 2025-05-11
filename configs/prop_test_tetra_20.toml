@@ -1,6 +1,6 @@
 #Configuration file example, following TOML
 c = 343	
-duration = 0.0025 #in seconds
+duration = 0.0035 #in seconds
 [mesh]
 filename = "1x1x1_20_tetra_mesh" #.jld2 added by script
 type = "Tetraheder" #Types: "Tetraheder" "Cartesian"
@@ -13,9 +13,9 @@ type = "Tetraheder" #Types: "Tetraheder" "Cartesian"
 name = ["reflecting", "transmitting"]
 r_factor = [1, 0]
 [sources]
-x = [0.2]
-y = [0.2]
-z = [0.2]
+x = [0.3]
+y = [0.3]
+z = [0.3]
 amp = [10]
 freq = [3430] #kHz
 type = ["sine"] #Types : "sine"	"dirac"
@@ -23,8 +23,9 @@ periods = [1]
 [measurements]
 filename = "tet_propagation_20" #.jld2 added by script
 	[measurements.microphones]
-	x = [0.27071, 0.41213, 0.62426, 0.28536, 0.45607, 0.5121, 0.3, 0.5, 0.8]
-	y = [0.27071, 0.41213, 0.62426, 0.235355, 0.30607, 0.41213 ,0.2, 0.2, 0.2]
-	z = [0.2, 0.2, 0.2, 0.23827, 0.3148, 0.4296, 0.2, 0.2, 0.2]
+	x = [0.37071, 0.51213, 0.72426, 0.38536, 0.55607, 0.6121, 0.4, 0.6, 0.9]
+	y = [0.37071, 0.51213, 0.72426, 0.335355, 0.40607, 0.51213, 0.3, 0.3, 0.3]
+	z = [0.3, 0.3, 0.3, 0.33827, 0.4148, 0.5296, 0.3, 0.3, 0.3]
+
 	#From the source these are all in polar coordinates:
 	#r: 0.1, 0.3 and 0.6; θ: 90°, 67.5°, 90° φ:45°, 22.5°, 0°

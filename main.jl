@@ -23,9 +23,14 @@ else
     println("Generating new mesh and saving to file: ", "meshes/"*mesh_file*".jld2")
     #generate mesh
     mconf = configs["mesh"]
-    mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
-                        crystal = mconf["type"], transmission_line_length = tll)
-    #save mesh
+    if haskey(mconf["dimensions"], "r")
+        mesh, tree = Generator.spheres(mconf["dimensions"]["r"],
+                            crystal = mconf["type"], transmission_line_length = tll)
+    else
+        mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
+                            crystal = mconf["type"], transmission_line_length = tll)
+    end
+                        #save mesh
     println("Saving mesh to file")
     Saving_dicts.to_jld2(mesh, tree, "meshes/"*mesh_file)
     mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
@@ -84,4 +89,5 @@ end
 end
 #save results
 save("results/"*configs["measurements"]["filename"]*".jld2", "measurements", measurements)
+save("results/"*configs["measurements"]["filename"]*".jld2", "source output", source_outputs)
 #further analysis done after importing data in a new script

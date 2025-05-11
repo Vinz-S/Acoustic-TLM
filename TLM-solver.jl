@@ -2,7 +2,7 @@ module Solver
 include("mesh-generator.jl")
     sine_sources::Vector{Any} = [] #[[node_index, amplitude, frequency, periods]]
     dirac_sources::Vector{Any} = [] #[[node_index, amplitude]]
-    source_outputs::Vector{Any} = [[],[]] #[[[timestamp, amplitude]...],[[timestamp, amplitude]...]
+    source_outputs::Vector{Any} = [[],[]] #[[[(timestamp, amplitude)...]],[[[(timestamp, amplitude)]...]]
     using NearestNeighbors
     using StaticArrays
     function generate_sine(nodes, position, kdtree = nothing; amplitude = 1, frequency = 1, periods = Inf)
@@ -13,6 +13,7 @@ include("mesh-generator.jl")
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
         #println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
         push!(sine_sources, [indexes[1], amplitude, frequency, periods])
+        push!(source_outputs[1], [])
     end
     function generate_dirac(nodes, position, kdtree = nothing; amplitude = 1)
         if kdtree === nothing
@@ -22,6 +23,7 @@ include("mesh-generator.jl")
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
         println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
         push!(dirac_sources, [indexes[1], amplitude])
+        push!(source_outputs[2], [])
     end
 
     function inbound!(nodes; reflection_factor = 1.0)
