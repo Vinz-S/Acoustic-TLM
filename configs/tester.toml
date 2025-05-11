@@ -1,0 +1,28 @@
+#Configuration file example, following TOML
+c = 343
+duration = 20 #in seconds
+[mesh]
+filename = "tester" #.jld2 added by script
+type = "Tetraheder"
+	[mesh.dimensions]
+	x = 25.0
+	y = 25.0
+	z = 20.0
+	tll = 1.0
+[surfaces] #This is currently not used by the script
+name = ["reflecting", "transmitting"]
+r_factor = [1, 0]
+[sources]
+x = [2]
+y = [6]
+z = [2]
+amp = [2]
+freq = [1] #kHz
+type = ["sine"]
+periods = [1]
+[measurements]
+filename = "tester" #.jld2 added by script
+	[measurements.microphones]
+	x = [5, 10]
+	y = [5, 10]
+	z = [5, 10]

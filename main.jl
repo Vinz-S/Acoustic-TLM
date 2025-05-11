@@ -8,7 +8,7 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config filegp
-config_name = "prop_test_tetra_20" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+config_name = "tester" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile("configs/"*config_name*".toml")
 c = configs["c"]
 
@@ -42,7 +42,8 @@ sources = configs["sources"]
 iter = ProgressBar(eachindex(sources["x"]))
 for i in iter
     if sources["type"][i] == "sine"
-        if haskey(sources, "iterations")
+        if haskey(sources, "periods")
+            display("Generating sine source with periods")
             Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i], frequency = sources["freq"][i], periods = sources["periods"][i])
         else
@@ -88,6 +89,5 @@ for i in its
 end
 end
 #save results
-save("results/"*configs["measurements"]["filename"]*".jld2", "measurements", measurements)
-save("results/"*configs["measurements"]["filename"]*".jld2", "source output", source_outputs)
+save("results/"*configs["measurements"]["filename"]*".jld2", "measurements", measurements, "source output", Solver.source_outputs)
 #further analysis done after importing data in a new script

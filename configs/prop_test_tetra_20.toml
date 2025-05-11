@@ -29,3 +29,4 @@ filename = "tet_propagation_20" #.jld2 added by script
 
 	#From the source these are all in polar coordinates:
 	#r: 0.1, 0.3 and 0.6; θ: 90°, 67.5°, 90° φ:45°, 22.5°, 0°
+	#The source/microphones might be to close to the wall to avoid microphone reflections
