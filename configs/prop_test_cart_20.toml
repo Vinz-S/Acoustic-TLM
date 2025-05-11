@@ -21,7 +21,7 @@ freq = [3430] #kHz
 type = ["sine"] #Types : "sine"	"dirac"
 periods = [1]
 [measurements]
-filename = "tet_propagation_20" #.jld2 added by script
+filename = "cart_propagation_20" #.jld2 added by script
 	[measurements.microphones]
 	x = [0.3, 0.5, 0.8, 0.27071, 0.41213, 0.62426, 0.25, 0.35, 0.5]
 	y = [0.2, 0.2, 0.2, 0.27071, 0.41213, 0.62426, 0.25, 0.35, 0.5]

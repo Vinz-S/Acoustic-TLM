@@ -104,6 +104,26 @@ module Generator
         end
         return nodes, kdtree
     end
+
+    function sphere(radius::Float64; crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
+        tll = transmission_line_length #saving line space; VV Two tlls used as margin in each axis VV
+        nodes, tree = nodes((2*(radius+tll), 2*(radius+tll), 2*(radius+tll)); crystal = crystal, transmission_line_length = tll)
+
+        #=
+        Ting å tenke på: 
+        -Tenke å bruke radius funksjon for å beholde alle noder som e i radius.
+        -lage nytt tre etter å ha fjernet noder? eksisterende tre e ikkje muterbare i denne modulen
+            ·Å numerere alle noder på nytt og lage nytt tre e en mulighet,
+                men å endre alle noder kan ver komplekst og koste enormt med datakraft.
+        -Boundaries må og beregenes på nytt
+            ·Kan ver en idé å bruke listen av fjenede noder, så:
+                ·Sortere listen
+                ·For hver gjenværende node sjekke om de har en fjernet nabo
+                ·Så endre naboen(e) til 0
+        -Kan muligens ver en ide å splitte ut deler av nodes funksjonen te egne funksjoner som anvendes i denne og
+        =#
+        return nodes, tree
+    end
 end
 
 module Saving_dicts
