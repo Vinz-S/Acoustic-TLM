@@ -2,7 +2,6 @@ module Solver
 include("mesh-generator.jl")
     sine_sources::Vector{Any} = [] #[[node_index, amplitude, frequency, periods]]
     dirac_sources::Vector{Any} = [] #[[node_index, amplitude]]
-    source_outputs::Vector{Any} = [[],[]] #[[[(timestamp, amplitude)...]],[[[(timestamp, amplitude)]...]]
     using NearestNeighbors
     using StaticArrays
     function generate_sine(nodes, position, kdtree = nothing; amplitude = 1, frequency = 1, periods = Inf)
