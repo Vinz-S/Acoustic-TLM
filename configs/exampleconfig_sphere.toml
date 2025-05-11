@@ -5,8 +5,9 @@ duration = 20 #in seconds
 filename = "example_sphere" #.jld2 added by script
 type = "Tetraheder"
 	[mesh.dimensions]
-	r = 1 #using radius instead of XYZ makes the code detect it's sphere shape
-	tll = 1.0
+	#using radius instead of XYZ makes the code detect it's sphere shape
+	r = 1 #The center will be placed at the coordinates [r, r, r]
+	tll = 0.01
 [surfaces] #This is currently not used by the script
 name = ["reflecting", "transmitting"]
 r_factor = [1, 0]
