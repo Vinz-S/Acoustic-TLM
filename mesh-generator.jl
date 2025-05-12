@@ -107,8 +107,53 @@ module Generator
 
     function sphere(radius::Float64; crystal::String = "Tetraheder", transmission_line_length::Float64 = 1.0)
         tll = transmission_line_length #saving line space; VV Two tlls used as margin in each axis VV
-        nodes, tree = nodes((2*(radius+tll), 2*(radius+tll), 2*(radius+tll)); crystal = crystal, transmission_line_length = tll)
+        nodes, tree = Generator.nodes((2*(radius+tll), 2*(radius+tll), 2*(radius+tll)); crystal = crystal, transmission_line_length = tll)
+        center = SVector(radius+tll, radius+tll, radius+tll)
+        within = inrange(tree, center, radius)
+        outside = []
+        sort!(within)
+        previous = 0
+        last_key = length(nodes)
+        for key in within 
+            if key-previous > 1
+                for key in (previous+1):(key-1)
+                    delete!(nodes, key)
+                    push!(outside, key)
+                end
+            end
+            previous = key
+        end
+        if previous < last_key
+            for i in previous+1:last_key
+                push!(outside, i)
+                delete!(nodes, i)
+            end
+        end
 
+        new_keys = Dict()
+        for (new, old) in enumerate(within)
+            new_keys[old] = new
+        end
+        no_branches = Blocks.no_branches[crystal] 
+        for key in within
+            for i in 1:no_branches
+                if nodes[key].neighbours[i] == 0
+                    continue
+                elseif nodes[key].neighbours[i] in outside 
+                    nodes[key].neighbours[i] = 0
+                else 
+                    nodes[key].neighbours[i] = new_keys[nodes[key].neighbours[i]]
+                end
+            end
+            # relies on each new key already having been iterated past, else a bug might occur
+            new_keys[key] == key ? continue : nothing
+            nodes[new_keys[key]] = nodes[key]
+            delete!(nodes, key)
+        end
+        iterations = 1:length(nodes)
+        tree = KDTree([(SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z)) for key in iterations])
+        return nodes, tree
+    end
         #=
         Ting å tenke på: 
         -Tenke å bruke radius funksjon for å beholde alle noder som e i radius.
@@ -122,8 +167,6 @@ module Generator
                 ·Så endre naboen(e) til 0
         -Kan muligens ver en ide å splitte ut deler av nodes funksjonen te egne funksjoner som anvendes i denne og
         =#
-        return nodes, tree
-    end
 end
 
 module Saving_dicts

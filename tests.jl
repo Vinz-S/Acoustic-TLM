@@ -4,8 +4,9 @@ include("TLM-solver.jl")
 include("post.jl")
 ###Testing the modules
 @time n, tree = Generator.nodes((8.0,8.0,6.0); crystal = "Tetraheder", transmission_line_length = sqrt(3));
-#= Saving_dicts.to_text(n, "demo")
-Saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2", "nodes")) =#
+@time n, tree = Generator.sphere(3.5; crystal = "Tetraheder", transmission_line_length = 1.0);
+ Saving_dicts.to_text(n, "spherenodes")
+# Saving_dicts.to_jld2(n, "demo") #tested in console using display(load("demo.jld2", "nodes"))
 #Visually seeing that the coordinates are correct:
 function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
@@ -31,7 +32,7 @@ end=#
 #= using GLMakie
 Solver.generate_dirac(n, (25, 25, 0), tree, amplitude = 25)
 
-points = [Point3f(node.x, node.y, node.z) for node in values(n)]
+points = [Point3f(node.x, node.y, node.z) fornode in values(n)]
 pressures = Observable([node.on_node for node in values(n)])
 
 fig, ax, l = scatter(points, color = pressures,
