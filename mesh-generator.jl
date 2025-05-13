@@ -114,6 +114,7 @@ module Generator
         sort!(within)
         previous = 0
         last_key = length(nodes)
+        pbar = ProgressBar(total = length(within))
         for key in within 
             if key-previous > 1
                 for key in (previous+1):(key-1)
@@ -122,6 +123,8 @@ module Generator
                 end
             end
             previous = key
+            update(pbar)
+            set_description(pbar, "Removing nodes outside the sphere: ")
         end
         if previous < last_key
             for i in previous+1:last_key
@@ -129,12 +132,15 @@ module Generator
                 delete!(nodes, i)
             end
         end
-
         new_keys = Dict()
+        pbar = ProgressBar(total = length(within))
         for (new, old) in enumerate(within)
             new_keys[old] = new
+            update(pbar)
+            set_description(pbar, "Generating new node numbers: ")
         end
         no_branches = Blocks.no_branches[crystal] 
+        pbar = ProgressBar(total = length(within))
         for key in within
             for i in 1:no_branches
                 if nodes[key].neighbours[i] == 0
@@ -149,9 +155,12 @@ module Generator
             new_keys[key] == key ? continue : nothing
             nodes[new_keys[key]] = nodes[key]
             delete!(nodes, key)
+            update(pbar)
+            set_description(pbar, "Replacing nodes with updated keys: ")
         end
         iterations = 1:length(nodes)
         tree = KDTree([(SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z)) for key in iterations])
+        println("The number of nodes in the sphere is: ", length(nodes))
         return nodes, tree
     end
         #=

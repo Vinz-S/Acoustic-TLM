@@ -50,7 +50,7 @@ include("mesh-generator.jl")
             nodes[source[1]].on_node += output
             push!(source_outputs[1][i],[timestamp, output])
         end
-        timestamp != 0 ? nothing : for source in dirac_sources
+        timestamp != 0 ? nothing : for (i, source) in enumerate(dirac_sources)
             nodes[source[1]].on_node += source[2]
             push!(source_outputs[2][i],[timestamp, source[2]])
             println("Iteration 0 run")
