@@ -10,6 +10,7 @@ f = configs["sources"]["freq"][1]
 tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
 it_time = tll/c #time per iteration
 data = load(codepath*"results/cart_propagation_20.jld2", "measurements")
+source = load(codepath*"results/cart_propagation_20.jld2", "source output")[1][1]
 λ = c/f #wavelength
 distances = [1, 3, 6] #in wavelengths
 
@@ -17,6 +18,7 @@ ys = 0:it_time:(length(data[1])-1)*it_time
 per = 1/f #wave period
 intervals =  [[i*per-per , i*per+2*per] for i in distances]
 
+#Plotting signals
 fig = Figure()
 ax1a = Axis(fig[1, 1], title = "On-axis, 1λ")
 lines!(ax1a, ys, data[1], color = :blue)
@@ -52,5 +54,9 @@ xlims!(ax2c, intervals[2][1], intervals[2][2])
 ax3c = Axis(fig[3, 3], title = "Off-axis, 6λ")
 lines!(ax3c, ys, data[9], color = :blue)
 xlims!(ax3c, intervals[3][1], intervals[3][2])
+
+#Plotting source:
+ax4 = Axis(fig[1,4], title = "Source output")
+lines!(ax4, [point[1] for point in source], [point[2] for point in source], color = :red)
 
 display(fig)

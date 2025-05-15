@@ -8,7 +8,7 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config filegp
-config_name = "prop_test_tetra_20" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+config_name = "cartres" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile("configs/"*config_name*".toml")
 c = configs["c"]
 
@@ -81,7 +81,7 @@ wavelengths = [c/freq for freq in sources["freq"]] #wavelength
 wtll = (wavelengths.^-1).*tll #tll in wavelengths
 @time begin
 for i in its
-    Solver.update_tlm!(mesh, i*it_time, reflection_factor = 1) #configs["reflection"]["factor"])
+    Solver.update_tlm!(mesh, i*it_time, reflection_factor = configs["surfaces"]["r_factor"])
     for j in eachindex(measurement_points)
         push!(measurements[j], mesh[measurement_points[j]].on_node)
     end

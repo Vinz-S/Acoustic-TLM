@@ -38,21 +38,21 @@ using NearestNeighbors
 using StaticArrays
 using Statistics
 #n, tree = load("demo.jld2", "nodes")
-@time n, tree = Generator.nodes((8.0,8.0,6.0), crystal = "Cartesian");
-Solver.generate_dirac(n, (2, 2, 2), tree, amplitude = 2)
+@time n, tree = Generator.nodes((80.0,80.0,60.0), crystal = "Tetraheder");
+Solver.generate_dirac(n, (2, 2, 2), tree, amplitude = 2000)
 
 points = [Point3f(node.x, node.y, node.z) for node in values(n)]
 pressures = Observable([node.on_node for node in values(n)])
-absolute_sum = zeros(length(n))|
+absolute_sum = zeros(length(n))
 
 fig, ax, l = scatter(points, color = pressures,
     colormap = :bluesreds,colorrange = (-1, 1),
     axis = (; type = Axis3, protrusions = (0, 0, 0, 0),
               viewmode = :fit), markersize = 10)
 
-iterations = 840
+iterations = 60
 record(fig, "lorenz.mp4", 0:iterations) do frame #default frame rate is 24 fps
-    Solver.update_tlm!(n, frame/24, reflection_factor = 1) #might want to get a variable for the frame rate
+    Solver.update_tlm!(n, frame/24, reflection_factor = 0) #might want to get a variable for the frame rate
     pressures[] = [node.on_node for node in values(n)]
     # ax.azimuth[] = (pi*frame/120)%2pi
     # ax.elevation[] = (pi*frame/120)%2pi
@@ -70,7 +70,7 @@ for i in eachindex(absolute_sum)
 end
 56.43040344862393
 
-function show_mesh(nodes) #This function is very slow on anything more than a few crystals
+#= function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
     points = [Point3f(nodes[i].x, nodes[i].y, nodes[i].z) for i in 1:length(nodes)]
@@ -84,4 +84,4 @@ function show_mesh(nodes) #This function is very slow on anything more than a fe
     return fig
 end
 
-f = show_mesh(n)
+f = show_mesh(n) =#

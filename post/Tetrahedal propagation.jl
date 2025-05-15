@@ -53,7 +53,7 @@ ax3c = Axis(fig[3, 3], title = "Off-axis, 6λ")
 lines!(ax3c, ys, data[9], color = :blue)
 xlims!(ax3c, intervals[3][1], intervals[3][2])
 
-source = Solver.source_outputs[1][1]
+#= source = Solver.source_outputs[1][1]
 lines!(ax1a, [point[1] for point in source], [point[2] for point in source], color = :red)
-
+ =#
 display(fig)
