@@ -60,6 +60,7 @@ record(fig, "lorenz.mp4", 0:iterations) do frame #default frame rate is 24 fps
     frame > 4*iterations/5 ? absolute_sum .+= abs.([n[i].on_node for i in 1:length(n)]) : nothing
 end
 
+#=
 #inrange(tree,SVector(50,0,0),2.0)
 println("mean absolute sum: ", mean(absolute_sum))
 println("max absolute sum: ", maximum(absolute_sum))
@@ -68,7 +69,7 @@ println("median absolute sum: ", median(absolute_sum))
 for i in eachindex(absolute_sum)
     absolute_sum[i] == 8.912279018801708 ? println(i) : nothing
 end
-56.43040344862393
+56.43040344862393 =#
 
 #= function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
@@ -85,3 +86,30 @@ end
 end
 
 f = show_mesh(n) =#
+
+#### Testing the frequency analysis 
+
+using TOML
+using JLD2
+using FileIO
+using GLMakie
+#= freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[1]), 1/it_time) #test with the first measurement point
+fig = Figure()
+ax = Axis(fig[1, 1], title = "FFT of measurement point 1")#, xscale = log10)
+stem!(ax, freqs, abs.(F), markersize = 10) =#
+
+signal_length = 431
+fs = 20 #sampling frequency
+signal = [sin(2*pi*0.1*i)+cos(2*pi*0.5*i) for i in range(0, step = 1/fs, length = signal_length)]
+
+nyquist = fs/2
+it_time = 1/fs #time per iteration
+fig = Figure()
+ax1 = Axis(fig[1, 1], title = "Time domain")#, xscale = log10)
+ax2 = Axis(fig[2, 1], title = "Frequncy domain")#, xscale = log10)
+lines!(ax1, signal)
+freqs, F = Analysis.signal_frequencies(Vector{Float64}(signal), fs) #test with the first measurement point
+lines!(ax2, freqs, F)#, markersize = 10)
+xlims!(ax2, 0, nyquist)
+
+display(fig)

@@ -47,12 +47,18 @@ for i in iter
             Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i], frequency = sources["freq"][i], periods = sources["periods"][i])
         else
+            display("Generating continuous sine source")
             Solver.generate_sine(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i], frequency = sources["freq"][i])
         end
     elseif sources["type"][i] == "dirac"
+        display("Generating dirac source")
         Solver.generate_dirac(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, 
                          amplitude = sources["amp"][i])
+    elseif sources["type"][i] == "chirp"
+        display("Generating chirp source")
+        Solver.generate_chirp(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, sources["fs"], sources["f1"], sources["fh"], sources["T"], 
+                         amplitude = sources["amp"][i],)
     else
         error("Unknown source type: "*sources["type"][i])
     end
