@@ -12,6 +12,7 @@ module Visualization
         end
         return fig
     end
+
     function point_avg(nodes, point, tll, tree = nothing) #gives the average of the nodes within a certain distance from the point
         if tree === nothing
             sorted_keys = sort([node[1] for node in nodes])
@@ -22,6 +23,40 @@ module Visualization
         return sum([nodes[idxs[i] for i = eachindex(dists)]])/length(dists)
             #calculate average here, trilinear interpolation? https://en.wikipedia.org/wiki/Multivariate_interpolation#Irregular_grid_(scattered_data)
             #use average as it shold be sufficient for fine grids
+    end
+
+   function cross_section(nodes::Dict{Any, Any} , configs::Dict{String, Any}, axis::String, cross_height, tree = nothing)
+        #Choose cross_section along x, y or z axis, and get the interpolated values in a matrix
+        #cross_height is how far along the axis the cross section is
+        tll = configs["mesh"]["dimensions"]["tll"]
+        if tree === nothing
+            sorted_keys = sort([node[1] for node in nodes])
+            tree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys])
+        end
+        idxs, dists = knn(tree, [height[1], height[2], height[3]], 10)
+        filter!(d->d<transmission_line_length*1.001, dists)
+        #Generate a lattice of points
+        dimensions = configs["mesh"]["dimensions"]["x"], configs["mesh"]["dimensions"]["y"], configs["mesh"]["dimensions"]["z"]
+        crossheight > dimensions[axis] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
+        lattice_dims;
+        if axis == "x" || axis == "X"
+            lattice_dims = (ceil(dimensions[2]/tll), ceil(dimensions[3]/tll))
+        elseif axis == "y" || axis == "Y"
+            lattice_dims = (ceil(dimensions[1]/tll), ceil(dimensions[3]/tll))
+        elseif axis == "z" || axis == "Z"
+            lattice_dims = (ceil(dimensions[1]/tll), ceil(dimensions[2]/tll))
+        else
+            throw(ErrorException("Unknown axis: "*axis))
+        end
+        lattice = zeros(lattice_dims[1], lattice_dims[2])
+
+        #Calculate the point_avg for each point in the lattice
+        for i in 1:dimensions[2], j in 1:dimensions[3]
+            lattice[i, j] = point_avg(nodes, (cross_height, i, j), tll)
+        end
+        #return the completed lattice
+            #In some way add a scale for the distances
+        return lattice, lattice_dims
     end
 end
 
