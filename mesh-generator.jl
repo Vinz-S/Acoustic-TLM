@@ -53,9 +53,9 @@ module Generator
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
                         #Accuracy is reduced to mitigate rounding errors, earlier prints showed an original accuracy of 17 digits
-                        push!(coordinates, (round(crystal[i][1]+(x-1)*crystal_size, sigdigits=accuracy), 
-                                            round(crystal[i][2]+(y-1)*crystal_size, sigdigits=accuracy), 
-                                            round(crystal[i][3]+(z-1)*crystal_size, sigdigits=accuracy)))
+                        push!(coordinates, (round(crystal[i][1]+(x-1)*crystal_size + transmission_line_length/2, sigdigits=accuracy), 
+                                            round(crystal[i][2]+(y-1)*crystal_size + transmission_line_length/2, sigdigits=accuracy), 
+                                            round(crystal[i][3]+(z-1)*crystal_size + transmission_line_length/2, sigdigits=accuracy)))
                     end
                 end
             end
