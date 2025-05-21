@@ -1,6 +1,7 @@
 module Visualization
     using GLMakie
     using NearestNeighbors
+    using StaticArrays
     function show_mesh(nodes) #This function is very slow on anything more than a few crystals
         fig = Figure()
         ax3d = Axis3(fig[1,1], title = "grid Visualization")
@@ -20,7 +21,7 @@ module Visualization
         end
         idxs, dists = knn(tree, [point[1], point[2], point[3]], 10)
         filter!(d->d<tll*1.001, dists)
-        return sum([nodes[idxs[i] for i = eachindex(dists)]])/length(dists)
+        return sum([nodes[idxs[i]].on_node for i = eachindex(dists)])/length(dists)
             #calculate average here, trilinear interpolation? https://en.wikipedia.org/wiki/Multivariate_interpolation#Irregular_grid_(scattered_data)
             #use average as it shold be sufficient for fine grids
     end
@@ -32,25 +33,35 @@ module Visualization
             sorted_keys = sort([node[1] for node in nodes])
             tree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys])
         end
-        idxs, dists = knn(tree, [height[1], height[2], height[3]], 10)
-        filter!(d->d<transmission_line_length*1.001, dists)
-        crossheight > mesh_dimensions[axis] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
-        lattice_dims;
+
+        lattice_dims = []
         if axis == "x" || axis == "X"
+            cross_height > mesh_dimensions[1] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
             lattice_dims = (ceil(mesh_dimensions[2]/tll), ceil(mesh_dimensions[3]/tll))
+            lattice = zeros(lattice_dims[1], lattice_dims[2])
+            for i in 1:lattice_dims[1], j in 1:lattice_dims[2]
+                #Adding a multiplication factor to only use the one node if there is one really close
+                lattice[i, j] = point_avg(nodes, (cross_height-tll/2, i-tll/2, j-tll/2), tll*0.95, tree)
+            end
         elseif axis == "y" || axis == "Y"
+            cross_height > mesh_dimensions[2] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
             lattice_dims = (ceil(mesh_dimensions[1]/tll), ceil(mesh_dimensions[3]/tll))
+            lattice = zeros(lattice_dims[1], lattice_dims[2])
+            for i in 1:lattice_dims[1], j in 1:lattice_dims[2]
+                lattice[i, j] = point_avg(nodes, (i-tll/2, cross_height-tll/2, j-tll/2), tll*0.95, tree)
+            end
         elseif axis == "z" || axis == "Z"
+            cross_height > mesh_dimensions[3] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
             lattice_dims = (ceil(mesh_dimensions[1]/tll), ceil(mesh_dimensions[2]/tll))
+            lattice = zeros(Int(lattice_dims[1]), Int(lattice_dims[2]))
+            for i in 1:Int(lattice_dims[1]), j in 1:Int(lattice_dims[2])
+                lattice[i, j] = point_avg(nodes, (i-tll/2, j-tll/2, cross_height-tll/2), tll*0.95, tree)
+            end
         else
             throw(ErrorException("Unknown axis: "*axis))
         end
-        lattice = zeros(lattice_dims[1], lattice_dims[2])
-
-        for i in 1:lattice_dims[1], j in 1:lattice_dims[2]
-            lattice[i, j] = point_avg(nodes, (cross_height, i, j), tll)
-        end
-        return lattice, lattice_dims
+        lattice_borders = [i*tll for i in 0:lattice_dims[1]], [i*tll for i in 0:lattice_dims[2]]
+        return lattice, lattice_borders
     end
 end
 
