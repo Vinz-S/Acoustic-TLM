@@ -1,5 +1,4 @@
 ###This file is supposed to conatain the module for the pre-processo
-using GLMakie
 using NearestNeighbors
 
 module Blocks #Coordinates of a base block x,y,z
