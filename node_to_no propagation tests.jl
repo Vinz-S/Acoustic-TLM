@@ -17,7 +17,7 @@ on_nodes = [[] for i in 1:length(followed_nodes)]
 #outbounds = [[] for i in 1:length(followed_nodes)]
 
 iterations = 300
-for i in 1:iterations
+for i in 0:iterations
     timestamp = i/60
     Solver.inbound!(n, reflection_factor = 0)
     Solver.on_node!(n, timestamp)

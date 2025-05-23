@@ -2,7 +2,7 @@
 
 #  using GLMakie
 #  GLMakie.activate!(inline=false)
-# using CairoMakie
+using CairoMakie
 # using JLD2
 # using FileIO
 using GeometryBasics
@@ -347,14 +347,14 @@ function singlePulse(position::Vector{Int64}, amplitude::Int64)
 end
 
 #Global values which functions rely on:
-const c = 100 #Speed of sound in m/s
-const tll = 1/2 #Transmission line length in m
+const c = 20 #Speed of sound in m/s
+const tll = 1 #Transmission line length in m
 const it_time = tll/c #iteration time in seconds
-const frequency = 10 #in Hz
+const frequency = 1 #in Hz
 const ppwl = (c/frequency)/tll #points per wavelength
-const iterations = 500 #ppwl*20 #how many iterations of the loop
-const grid_x = 300 #Int(ppwl*18) # size in x direction
-const grid_y = 400 #Int(ppwl*24) # size in y direction
+const iterations = 300 #ppwl*20 #how many iterations of the loop
+const grid_x = 600 #Int(ppwl*18) # size in x direction
+const grid_y = 300 #Int(ppwl*24) # size in y direction
 #const rm = ppwl*7 # reflection margin
 
 @time begin
@@ -370,93 +370,48 @@ pressure_matrix::Matrix{Float64} = zeros(size(grid)[1], size(grid)[2]) #only use
 println("points per wavelength: " * string(ppwl))
 
 end
-#Setting up the figure
-# const maxheight = 1000 #in pixels adjusted for 16:9 1080p screens
-# const maxwidth = 1800
-
-# f = Figure(size = windowSize(maxheight, maxwidth))
-# ax = Axis(f[1, 1])
-# colsize!(f.layout, 1, Aspect(1, 1.0))
-# xlims!(ax, 0, grid_x)
-# ylims!(ax, 0, grid_y)
-# #scatter!([Point2f(node[2].position[1], node[2].position[2]) for node in nodes])
-
-# #Setting up the colourmap
-# displayed_range = (-1, 1) #The range displayed values for the colourmap
-# pressure_matrix[grid_x, grid_y]::Float64 = 1.0
-# mapping_matrix = Observable(pressure_matrix)
-# heatmap!(mapping_matrix, colorrange = displayed_range)
-# Colorbar(f[1, 2], colorrange = displayed_range, colormap = :viridis, flipaxis = false)
-# resize_to_layout!(f)
 
 #Boundary:
-@time SetBounds([[50.0, 50],[grid_x-49, 50],[grid_x-49 , grid_y-49],[50 , grid_y-49],[50 ,50]], 0.0)
+#@time SetBounds([[0, 0],[120, 0],[120, 20],[0 , 20],[0 ,0]], 0.0)
 
-#Walls:
-#testboundary = [[1,1],[3,2], [1,3],[10,20]];
-#testboundary = [[5,5], [5,35], [50,35],[50,5],[5,5]]
-# vertical pipe
-#= left_pipewall = [[rm-1.5, 1], [rm-1.5, grid_y]]
-right_pipewall = [[rm+1.5, 1], [rm+1.5, grid_y]] =#
-## 45 degree pipe
-# left_pipewall = [[1, 2.5], [grid_x, grid_x+1.5]] 
-# right_pipewall = [[2.5, 1], [grid_x, grid_x-1.5]]
-# lines!([p[1] for p in left_pipewall],[p[2] for p in left_pipewall]; linewidth = 1)
-# lines!([p[1] for p in right_pipewall],[p[2] for p in right_pipewall]; linewidth = 1)
-# drawWall(left_pipewall, 1.0, nodes);
-# drawWall(right_pipewall, 1.0, nodes);
-# display(f) #The figure is actually "launched" here, f alone shoould be enough, but in my experience often is not
+#= sorted_keys = sort([node[1] for node in nodes])
+kdtree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys]) =#
 
-# sleep(10)
-#Place walls here:
-#testboundary = [[1+10, 1+10],[1+10, grid_y-10], [grid_x-10, grid_y-10], [1+10, 1+10]]
-#drawWall(testboundary, 1, nodes);
+n_followed = 10
+followed_nodes = [grid[300+12*i, 150] for i in 0:n_followed-1] #øker til 12*i etter å ha sjekket at adressene stemmer
+on_nodes = [[] for i in 1:length(followed_nodes)]
 
-#Sources:
-addSource([grid_x/2, grid_y/2], 1, frequency, 1)
-
-
-# pulse_source = [Int(rm), Int(rm)]
-# timestamps::Vector{Float64} = []
-# positions::Vector{Vector{Int64}} = [[pulse_source[1], pulse_source[2]+ppwl],[pulse_source[1], pulse_source[2]+3*ppwl], [pulse_source[1], pulse_source[2]+6*ppwl], [pulse_source[1], pulse_source[2]+12*ppwl]]
-# #= positions::Vector{Vector{Real}} = []
-# let z = ppwl/sqrt(2)
-#     global positions = [[pulse_source[1]+z, pulse_source[2]+z],[pulse_source[1]+3*z, pulse_source[2]+3*z], [pulse_source[1]+6*z, pulse_source[2]+6*z], [pulse_source[1]+12*z, pulse_source[2]+12*z]]
-# end
-# positions = [[Int(round(point[1])), Int(round(point[2]))] for point in positions] =#
-# # scatter!([Point2f(position[1], position[2]) for position in positions]) #displaying microphones
-# sleep(5) #giving time to zoom before the interface stops responding
-# pressures = [[] for i = 1:length(positions)+1]
 @time begin
-#running the animation
-ite::Int64 = 0 
-while ite < iterations
-    # ite%25 < 1 ? println(ite) : nothing
-    pressureupdate(nodes, ite)
-    #push!(pressures[length(positions)+1], sineImpulse(pulse_source, 1, ite))
-    # pulse_source[1]-=1 ; sineImpulse(pulse_source, 1, ite)
-    # pulse_source[1]+=2 ; sineImpulse(pulse_source, 1, ite)
-    # pulse_source[1]-=1 
-    #mapping_matrix[] = pressure_matrix
-    # for i = 1:length(positions)
-    #     push!(pressures[i], nodes[grid[positions[i][1],positions[i][2]]].pressure)
-    # end
-    # push!(timestamps, ite*it_time)
-    #sleep(it_time)
-    global ite += 1
+    #running the animation
+    ite::Int64 = 0 
+    while ite < iterations
+        sineImpulse([300, 150], 1, ite)
+        pressureupdate(nodes, ite)
+        for (i, node) in enumerate(followed_nodes)
+            push!(on_nodes[i], nodes[node].pressure)
+        end
+        global ite += 1
+    end
 end
+
+positions = []
+for node in followed_nodes
+    push!(positions, nodes[node].position)
 end
-# fig = Figure()
-# axs = [Axis(fig[i, 1]) for i in 1:(1+length(positions))]
-# lines!(axs[1], -timestamps, pressures[5], label = string("source output, "*string(pulse_source)))
-# fig[1,2] = Legend(fig, axs[1]); hidedecorations!(axs[1]); hidespines!(axs[1])
-# ylims!(axs[1], -1.05, 1.05)
-# for i = 1:length(positions)
-#     lines!(axs[i+1],-timestamps, pressures[i], label = string(positions[i]))
-#     fig[i+1,2] = Legend(fig, axs[i+1]); hidedecorations!(axs[i+1]); hidespines!(axs[i+1])
-# end
-# display(fig)
-# save("vertical freespace cartesian.pdf", fig)
+fig = Figure(size = (1200, 800), resolution = (1200, 800))
+range1 = 1:ceil(Int64, n_followed/2)
+range2 = ceil(Int64, n_followed/2)+1:n_followed
+ax1 = [Axis(fig[i, 1], title = "On_node "*string(positions[i])) for i in range1]
+ax2 = [Axis(fig[i-ceil(Int64, n_followed/2), 2], title = "On_node "*string(positions[i])) for i in range2]
+for i in 1:Int(length(followed_nodes)/2)
+    lines!(ax1[i], on_nodes[range1[i]], color = :red)
+    try lines!(ax2[i], on_nodes[range2[i]], color = :red)
+    catch
+    end   
+end
+#save("On_axis.pdf", fig)
+display(fig)
+
 try
     throw(DomainError(nothing))
 catch
