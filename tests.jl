@@ -42,20 +42,20 @@ using Statistics
 #n, tree = load("demo.jld2", "nodes")
 @time n, tree = Generator.nodes((80.0,80.0,60.0), crystal = "Cartesian");
 #Solver.generate_dirac(n, (2, 2, 2), tree, amplitude = 2000)
-Solver.generate_sine(n, (40,40, 30), tree, frequency = 0., periods = 1)
+Solver.generate_sine(n, (40,40, 30), tree, frequency = 1.0, periods = 1, amplitude = 50)
 #points = [Point3f(node.x, node.y, node.z) for node in values(n)]
 #pressures = Observable([node.on_node for node in values(n)])
 #absolute_sum = zeros(length(n))
-lattice = Visualization.cross_section(n, 1, (80.0, 80.0, 60.0), "z", 30, tree)
+lattice = Visualization.cross_section(n, 1, (80.0, 80.0, 62.0), "z", 30, tree)
 intensity = Observable(lattice[1])
 borders = lattice[2]
-fig, ax, hmap = heatmap(borders[1], borders[1], intensity)
+fig, ax, hmap = heatmap(borders[1], borders[2], intensity, colorrange = (-1, 1))
 #= scatter(points, color = pressures,
     colormap = :bluesreds,colorrange = (-1, 1),
     axis = (; type = Axis3, protrusions = (0, 0, 0, 0),
               viewmode = :fit), markersize = 10) =#
 
-iterations = 60
+iterations = 120
 record(fig, "vid_results/cart_prop_check.mp4", 0:iterations, framerate = 24) do frame #default frame rate is 24 fps
     Solver.update_tlm!(n, frame/24, reflection_factor = 0) #might want to get a variable for the frame rate
     lattice = Visualization.cross_section(n, 1, (80.0, 80.0, 60.0), "z", 30, tree)
@@ -66,11 +66,11 @@ record(fig, "vid_results/cart_prop_check.mp4", 0:iterations, framerate = 24) do 
     #ax.azimuth[] = 1.7pi + 0.3 * sin(2pi * frame / 120)
     #frame > 4*iterations/5 ? absolute_sum .+= abs.([n[i].on_node for i in 1:length(n)]) : nothing
 end
-fig = Figure()
+#= fig = Figure()
 ax = Axis(fig[1, 1], title = "Source output")
 data = Solver.source_outputs[1][1]
 lines!(ax, [data[i][2] for i in eachindex(data)], [data[i][1] for i in eachindex(data)])
-fig
+fig =#
 #=
 #inrange(tree,SVector(50,0,0),2.0)
 println("mean absolute sum: ", mean(absolute_sum))
