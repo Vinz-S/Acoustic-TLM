@@ -1,5 +1,6 @@
 ###This file is supposed to conatain the module for the pre-processo
 using CairoMakie
+#using GLMakie
 using NearestNeighbors
 
 module Blocks #Coordinates of a base block x,y
@@ -186,7 +187,7 @@ include("mesh-generator.jl")
     end
 end
 
-n, tree = Generator.nodes((120.0,20.0), crystal = "Cartesian", transmission_line_length = 1.0)
+n, tree = Generator.nodes((600.0,200.0), crystal = "Cartesian", transmission_line_length = 1.0)
 
 function find_nearest_node(tree, position)
     indexes, distances = knn(tree, position, 1, true)
@@ -194,20 +195,21 @@ function find_nearest_node(tree, position)
 end
 
 n_followed = 10
-followed_nodes = [Int(find_nearest_node(tree, [3.5+12*i, 4.5])) for i in 0:n_followed-1]
+followed_nodes = [Int(find_nearest_node(tree, [199.5+12*i, 99.5])) for i in 0:n_followed-1]
 #inbounds = [[] for i in 1:length(followed_nodes)]
 on_nodes = [[] for i in 1:length(followed_nodes)]
 #outbounds = [[] for i in 1:length(followed_nodes)]
 
-iterations = 300
+iterations = 450
 for i in 0:iterations
-    timestamp = i/60
+    timestamp = i/20
     Solver.inbound!(n, reflection_factor = 0)
     Solver.on_node!(n, timestamp)
     #i <= 60 ? n[followed_nodes[1]].on_node += sin(2*pi*timestamp) : nothing
     Solver.outbound!(n)
     #i <= 120 ? n[followed_nodes[1]].outbound[4] += sin(2*pi*timestamp) : nothing
-    i <= 120 ? n[followed_nodes[1]].outbound .+= sin(2*pi*timestamp) : nothing
+    # i <= 60 ? n[followed_nodes[1]].outbound .+= sin(2*pi*timestamp) : nothing
+    i <= 0 ? n[followed_nodes[1]].outbound .+= 1 : nothing
     for (i, node) in enumerate(followed_nodes)
         #push!(inbounds[i], n[node].inbound)
         push!(on_nodes[i], n[node].on_node)
@@ -229,7 +231,7 @@ for i in 1:Int(length(followed_nodes)/2)
     try lines!(ax2[i], on_nodes[range2[i]], color = :red)
     catch
     end   
-    #lines!(axo[i], outbounds[i], color = :green)
+    # lines!(axo[i], outbounds[i], color = :green)
 end
-save("On_axis.pdf", fig)
+save("results/2-d dirac wave.pdf", fig)
 fig

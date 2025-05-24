@@ -332,8 +332,8 @@ function windowSize(maxwidth::Int64, maxheight::Int64)
     window_ratio > display_ratio ? (return maxwidth, maxwidth/window_ratio) : (return maxheight*window_ratio, maxheight)
 end
 
-function sineImpulse(position::Vector{Int64}, amplitude::Int64, iteration::Int64)
-    if frequency*iteration*it_time<=1
+function sineImpulse(position::Vector{Int64}, amplitude::Int64, iteration::Int64; periods::Int64 = 1)
+    if frequency*iteration*it_time <= periods
         output = amplitude*sin(2*pi*frequency*iteration*it_time)
     else output = 0
     end
@@ -352,9 +352,9 @@ const tll = 1 #Transmission line length in m
 const it_time = tll/c #iteration time in seconds
 const frequency = 1 #in Hz
 const ppwl = (c/frequency)/tll #points per wavelength
-const iterations = 300 #ppwl*20 #how many iterations of the loop
+const iterations = 450 #ppwl*20 #how many iterations of the loop
 const grid_x = 600 #Int(ppwl*18) # size in x direction
-const grid_y = 300 #Int(ppwl*24) # size in y direction
+const grid_y = 200 #Int(ppwl*24) # size in y direction
 #const rm = ppwl*7 # reflection margin
 
 @time begin
@@ -378,14 +378,14 @@ end
 kdtree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys]) =#
 
 n_followed = 10
-followed_nodes = [grid[300+12*i, 150] for i in 0:n_followed-1] #øker til 12*i etter å ha sjekket at adressene stemmer
+followed_nodes = [grid[200+30*i, 100] for i in 0:n_followed-1] #øker til 12*i etter å ha sjekket at adressene stemmer
 on_nodes = [[] for i in 1:length(followed_nodes)]
 
 @time begin
     #running the animation
     ite::Int64 = 0 
     while ite < iterations
-        sineImpulse([300, 150], 1, ite)
+        sineImpulse([200, 100], -1, ite, periods = 3)
         pressureupdate(nodes, ite)
         for (i, node) in enumerate(followed_nodes)
             push!(on_nodes[i], nodes[node].pressure)
