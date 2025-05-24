@@ -14,7 +14,7 @@ include("mesh-generator.jl")
         end
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
         #println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
-        push!(sine_sources, [indexes[1], amplitude, frequency, periods])
+        push!(sine_sources, [indexes[1], amplitude, frequency/sqrt(3), periods]) #/sqrt(3) to adjust for speed of sound in 3D mesh
         push!(source_outputs[1], [])
     end
     function generate_dirac(nodes, position, kdtree = nothing; amplitude = 1)
@@ -34,7 +34,7 @@ include("mesh-generator.jl")
         end
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
         #println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
-        push!(chirp_sources, [indexes[1], fs, T, chirp(T, fs, fl, fh; method = method)])
+        push!(chirp_sources, [indexes[1], fs, T, chirp(T, fs/sqrt(3), fl/sqrt(3), fh; method = method)])
         push!(source_outputs[3], [])
     end
 
