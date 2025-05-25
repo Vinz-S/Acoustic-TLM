@@ -13,14 +13,14 @@ configs = TOML.parsefile("configs/"*config_name*".toml")
 c = configs["c"]
 
 #creating/loading mesh_file
-mesh_file = configs["mesh"]["filename"]
+#mesh_file = configs["mesh"]["filename"]
 tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
 #This implementation might be prone to human error if different setups keep the same filenames
-if isfile("meshes/"*mesh_file*".jld2")
-    println("Loading mesh from file: ", "meshes/"*mesh_file*".jld2")
-    mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
-else
-    println("Generating new mesh and saving to file: ", "meshes/"*mesh_file*".jld2")
+# if isfile("meshes/"*mesh_file*".jld2")
+#     println("Loading mesh from file: ", "meshes/"*mesh_file*".jld2")
+#     mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
+# else
+#     println("Generating new mesh and saving to file: ", "meshes/"*mesh_file*".jld2")
     #generate mesh
     mconf = configs["mesh"]
     if haskey(mconf["dimensions"], "r")
@@ -30,11 +30,11 @@ else
         mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
                             crystal = mconf["type"], transmission_line_length = tll)
     end
-                        #save mesh
-    println("Saving mesh to file")
-    Saving_dicts.to_jld2(mesh, tree, "meshes/"*mesh_file)
-    mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
-end
+#                         #save mesh
+#     println("Saving mesh to file")
+#     Saving_dicts.to_jld2(mesh, tree, "meshes/"*mesh_file)
+#     mesh, tree = load("meshes/"*mesh_file*".jld2", "nodes")
+# end
 println("Mesh loaded, size: ", length(mesh), " nodes")
 
 #generate sources

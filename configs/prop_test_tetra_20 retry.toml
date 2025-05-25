@@ -5,9 +5,9 @@ duration = 0.0045 #in seconds
 filename = "1x1x1_20_tetra_mesh2" #.jld2 added by script
 type = "Tetraheder" #Types: "Tetraheder" "Cartesian"
 	[mesh.dimensions]
-	x = 1.5
-	y = 1.5
-	z = 1.5
+	x = 1.3
+	y = 1.3
+	z = 1.3
 	tll = 0.005
 [surfaces] #This is currently not used by the script
 name = ["reflecting", "transmitting"]
