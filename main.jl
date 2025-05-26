@@ -8,13 +8,14 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config filegp
-config_name = "prop_test_tetra_20 retry" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+config_name = "prop_test_cart_20 short" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile("configs/"*config_name*".toml")
-c = configs["c"]
+c = configs["c"]/sqrt(3) #speed of sound, multiplied by sqrt(3) to account for the 3D mesh
 
 #creating/loading mesh_file
 #mesh_file = configs["mesh"]["filename"]
 tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
+it_time = tll/c #time per iteration
 #This implementation might be prone to human error if different setups keep the same filenames
 # if isfile("meshes/"*mesh_file*".jld2")
 #     println("Loading mesh from file: ", "meshes/"*mesh_file*".jld2")
@@ -57,7 +58,7 @@ for i in iter
                          amplitude = sources["amp"][i])
     elseif sources["type"][i] == "chirp"
         display("Generating chirp source")
-        Solver.generate_chirp(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), tree, sources["fs"], sources["f1"], sources["fh"], sources["T"], 
+        Solver.generate_chirp(mesh, (sources["x"][i], sources["y"][i], sources["z"][i]), 1/it_time, sources["fl"], sources["fh"], sources["T"], tree,
                          amplitude = sources["amp"][i],)
     else
         error("Unknown source type: "*sources["type"][i])
@@ -80,7 +81,6 @@ end
 measurement_points = [i[1] for i in knn(tree, measurement_points, 1)[1]] #finds the closest node to the measurement point
 measurements = [[] for i in eachindex(measurement_points)] # The pressure values are saved here
 #run simulation
-it_time = tll/c #time per iteration
 #Beginning from 0 creates an adittional bugged progressbar, workaround not found so far
 its = ProgressBar(0:ceil(configs["duration"]/it_time)+1) #iterations
 wavelengths = [c/freq for freq in sources["freq"]] #wavelength

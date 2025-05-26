@@ -14,7 +14,7 @@ include("mesh-generator.jl")
         end
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
         #println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
-        push!(sine_sources, [indexes[1], amplitude, frequency/sqrt(3), periods]) #/sqrt(3) to adjust for speed of sound in 3D mesh
+        push!(sine_sources, [indexes[1], amplitude, frequency, periods])
         push!(source_outputs[1], [])
     end
     function generate_dirac(nodes, position, kdtree = nothing; amplitude = 1)
@@ -27,14 +27,16 @@ include("mesh-generator.jl")
         push!(dirac_sources, [indexes[1], amplitude])
         push!(source_outputs[2], [])
     end
-    function generate_chirp(nodes, position, fs, f1, fh, T, kdtree = nothing; amplitude = 1, method = "logarithmic")
+    function generate_chirp(nodes, position, fs, fl, fh, T, kdtree = nothing; amplitude = 1, method = "logarithmic")
         if kdtree === nothing
             sorted_keys = sort([node[1] for node in nodes])
             kdtree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys])
         end
+        display(kdtree)
+        display(position)
         indexes, distances = knn(kdtree, [position[1], position[2], position[3]], 1, true)
         #println("Position: "*string(position)*" Indexes: "*string(indexes)*" Distances: "*string(distances))
-        push!(chirp_sources, [indexes[1], fs, T, chirp(T, fs/sqrt(3), fl/sqrt(3), fh; method = method)])
+        push!(chirp_sources, [indexes[1], fs, T, chirp(T, fs, fl, fh; method = method)])
         push!(source_outputs[3], [])
     end
 
@@ -68,7 +70,7 @@ include("mesh-generator.jl")
             println("Iteration 0 run")
         end
         for (i, source) in enumerate(chirp_sources)
-            if timestamp <= source[3]
+            if Int(round(timestamp*source[2])) < length(source[4])
                 output = source[4][Int(round(timestamp*source[2]))+1] #+1 as the first timestamp is expected to be 0
                 nodes[source[1]].on_node += output
                 push!(source_outputs[3][i],[timestamp, output])

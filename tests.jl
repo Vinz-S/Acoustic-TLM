@@ -46,7 +46,7 @@ Solver.generate_sine(n, (40,40, 30), tree, frequency = 1.0, periods = 1, amplitu
 #points = [Point3f(node.x, node.y, node.z) for node in values(n)]
 #pressures = Observable([node.on_node for node in values(n)])
 #absolute_sum = zeros(length(n))
-lattice = Visualization.cross_section(n, 1, (80.0, 80.0, 62.0), "z", 30, tree)
+lattice = Visualization.cross_section(n, 1, (80.0, 80.0, 60), "z", 30, tree)
 intensity = Observable(lattice[1])
 borders = lattice[2]
 fig, ax, hmap = heatmap(borders[1], borders[2], intensity, colorrange = (-1, 1))

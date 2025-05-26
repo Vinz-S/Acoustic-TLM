@@ -11,7 +11,7 @@ ax = Axis(fig[1, 1], title = "FFT of measurement point 1")#, xscale = log10)
 stem!(ax, freqs, abs.(F), markersize = 10) =#
 
 ###First resonance test
-config_name = "cartres"
+config_name = "Chirp resonances"
 configs = TOML.parsefile("configs/"*config_name*".toml")
 dimensions = configs["mesh"]["dimensions"]["x"], configs["mesh"]["dimensions"]["y"], configs["mesh"]["dimensions"]["z"]
 
@@ -28,23 +28,28 @@ for i in eachindex(measurements)
     push!(taxs, Axis(fig[i, 2], title = "Measurement point $(i)", #xscale = log10,
     xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5)))
-    lines!(taxs[i], measurements[i])
+    stairs!(taxs[i], measurements[i], step=:center)
     push!(faxs, Axis(fig[i, 1], title = "FFT of measurement point $(i)", #xscale = log10,
     xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5)))
     # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
     freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[i]), 2*nyquist) #test with the first measurement point
-    lines!(faxs[i], freqs, F)#, markersize = 10)
-    xlims!(faxs[i], 0, 200)
-#Generer et signal, kjør en frekvensanalyse og sjekk at metoden funke.
-    
-signal_length = 431
-
-
-
+    stairs!(faxs[i], freqs, F, step=:center)#, markersize = 10)
+    xlims!(faxs[i], 0, 350)
 end
+source = load("results/"*configs["measurements"]["filename"]*".jld2", "source output")[3][1]
+    push!(taxs, Axis(fig[4, 2], title = "source", #xscale = log10,
+    xminorticksvisible = true, xminorgridvisible = true,
+    xminorticks = IntervalsBetween(5)))
+    stairs!(taxs[4], [source[i][2] for i in eachindex(source)], step=:center)
+    push!(faxs, Axis(fig[4, 1], title = "FFT source", #xscale = log10,
+    xminorticksvisible = true, xminorgridvisible = true,
+    xminorticks = IntervalsBetween(5)))
+    # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
+    freqs, F = Analysis.signal_frequencies(Vector{Float64}([source[i][2] for i in eachindex(source)]), 2*nyquist) #test with the first measurement point
+    stairs!(faxs[4], freqs, F, step=:center)#, markersize = 10)
+    xlims!(faxs[4], 0, 350)
 display(fig)
-source = load("results/"*configs["measurements"]["filename"]*".jld2", "source output")
 
 #= @time n, tree = Generator.nodes(dimensions, crystal = "Cartesian", transmission_line_length = configs["mesh"]["dimensions"]["tll"]);
 n[knn(tree, [0.3,0.3,0.3], 1, true)[1][1]].on_node = 1000 # Manual dirac source

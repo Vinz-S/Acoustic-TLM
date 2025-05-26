@@ -3,36 +3,48 @@ include("TLM-solver.jl")
 
 using CairoMakie
 
-n, tree = Generator.nodes((120.0,20.0,20.0), crystal = "Cartesian", transmission_line_length = 1.0)
+n, tree = Generator.nodes((7.0,7.0,7.0), crystal = "Tetraheder", transmission_line_length = 1.0)
 
 function find_nearest_node(tree, position)
     indexes, distances = knn(tree, position, 1, true)
     return indexes[1]
 end
 
-n_followed = 10
-followed_nodes = [Int(find_nearest_node(tree, [3.5+12*i, 4.5, 4.5])) for i in 0:n_followed-1]
+n_followed = 3
+followed_nodes = [Int(find_nearest_node(tree, [3.5+i, 3.5, 3.5])) for i in 0:n_followed-1]
 #inbounds = [[] for i in 1:length(followed_nodes)]
 on_nodes = [[] for i in 1:length(followed_nodes)]
 #outbounds = [[] for i in 1:length(followed_nodes)]
 
-iterations = 300
+iterations = 5
 for i in 0:iterations
     timestamp = i/60
+    println("\n Iteration: "*string(i))
+    for i in followed_nodes
+        display(n[i])
+    end
+    println("a")
     Solver.inbound!(n, reflection_factor = 0)
+    for i in followed_nodes
+        display(n[i])
+    end
+    println("b")
     Solver.on_node!(n, timestamp)
+    i <= 0 ? n[followed_nodes[1]].on_node += 1 : nothing
+    for i in followed_nodes
+        display(n[i])
+    end
+    println("c")
     #i <= 60 ? n[followed_nodes[1]].on_node += sin(2*pi*timestamp) : nothing
     Solver.outbound!(n)
-    i <= 120 ? n[followed_nodes[1]].outbound[4] += sin(2*pi*timestamp) : nothing
+    #i <= 120 ? n[followed_nodes[1]].outbound[4] += sin(2*pi*timestamp) : nothing
     #i <= 60 ? n[followed_nodes[1]].outbound .+= sin(2*pi*timestamp) : nothing
-    for (i, node) in enumerate(followed_nodes)
-        #push!(inbounds[i], n[node].inbound)
-        push!(on_nodes[i], n[node].on_node)
-        #push!(outbounds[i], n[node].outbound)
+    for i in followed_nodes
+        display(n[i])
     end
 end
 
-positions = []
+#= positions = []
 for node in followed_nodes
     push!(positions, (n[node].x, n[node].y, n[node].z))
 end
@@ -49,4 +61,8 @@ for i in 1:Int(length(followed_nodes)/2)
     #lines!(axo[i], outbounds[i], color = :green)
 end
 save("On_axis.pdf", fig)
-fig
+fig =#
+
+#= fig = Figure(size = (1200, 800), resolution = (1200, 800))
+source = Solver.source_outputs[1][1]
+stairs!(fig[1, 1], [point[1] for point in source], [point[2] for point in source]; step=:center, color = :red, label = "On_node 1") =#

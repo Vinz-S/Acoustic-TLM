@@ -1,6 +1,6 @@
 ###This file is supposed to conatain the module for the pre-processo
-using CairoMakie
-#using GLMakie
+#using CairoMakie
+using GLMakie
 using NearestNeighbors
 
 module Blocks #Coordinates of a base block x,y
@@ -217,7 +217,7 @@ for i in 0:iterations
     end
 end
 
-positions = []
+#= positions = []
 for node in followed_nodes
     push!(positions, (n[node].x, n[node].y))
 end
@@ -233,5 +233,5 @@ for i in 1:Int(length(followed_nodes)/2)
     end   
     # lines!(axo[i], outbounds[i], color = :green)
 end
-save("results/2-d sine wave.pdf", fig)
-fig
+#save("results/2-d sine wave.pdf", fig)
+fig =#
