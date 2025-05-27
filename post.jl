@@ -84,11 +84,15 @@ module Analysis
         display(fig) =#
         return resonances #have them in a dataframe?
     end
-    function signal_frequencies(signal, fs)
+    function signal_frequencies(signal, fs, from = nothing, to = nothing)
         n = 2^(ceil(Int, log2(length(signal)))+5) # Calculate the next power of 2
         padded_signal = vcat(signal, zeros(n - length(signal))) # Zero pad the signal
         F = (fftshift(abs.(fft(padded_signal))))
         freqs = fftshift(fftfreq(length(padded_signal), fs))
-        return freqs, F
+        pos_i_0 = findfirst(>=(0),freqs) #finding the indices of the positive frequencies
+        posi_i_n = length(freqs)
+        from === nothing ? nothing : pos_i_0 = findfirst(>=(from), freqs)
+        to === nothing ? nothing : posi_i_n = findlast(<=(to), freqs)
+        return freqs[pos_i_0:posi_i_n], F[pos_i_0:posi_i_n]
     end
 end
