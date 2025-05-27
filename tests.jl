@@ -40,7 +40,7 @@ using NearestNeighbors
 using StaticArrays
 using Statistics
 #n, tree = load("demo.jld2", "nodes")
-@time n, tree = Generator.nodes((80.0,80.0,60.0), crystal = "Cartesian");
+@time n, tree = Generator.nodes((80.0,80.0,60.0), crystal = "Tetraheder");
 #Solver.generate_dirac(n, (2, 2, 2), tree, amplitude = 2000)
 Solver.generate_sine(n, (40,40, 30), tree, frequency = 1.0, periods = 1, amplitude = 50)
 #points = [Point3f(node.x, node.y, node.z) for node in values(n)]
@@ -55,9 +55,9 @@ fig, ax, hmap = heatmap(borders[1], borders[2], intensity, colorrange = (-1, 1))
     axis = (; type = Axis3, protrusions = (0, 0, 0, 0),
               viewmode = :fit), markersize = 10) =#
 
-iterations = 120
-record(fig, "vid_results/cart_prop_check.mp4", 0:iterations, framerate = 24) do frame #default frame rate is 24 fps
-    Solver.update_tlm!(n, frame/24, reflection_factor = 0) #might want to get a variable for the frame rate
+iterations = 180
+record(fig, "vid_results/tet_prop_check.mp4", 0:iterations, framerate = 24) do frame #default frame rate is 24 fps
+    Solver.update_tlm!(n, frame/24, reflection_factor = 0.5) #might want to get a variable for the frame rate
     lattice = Visualization.cross_section(n, 1, (80.0, 80.0, 60.0), "z", 30, tree)
     intensity[] = lattice[1]
     borders = lattice[2]

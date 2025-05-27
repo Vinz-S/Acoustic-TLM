@@ -82,6 +82,7 @@ module Analysis
         xs, ys = [r[1] for r in resonances], [length(r[2]) for r in resonances]
         stem!(ax, xs, ys, markersize = 10)
         display(fig) =#
+        delete!(resonances, 0.0) #remove the zero frequency resonance
         return resonances #have them in a dataframe?
     end
     function signal_frequencies(signal, fs, from = nothing, to = nothing)

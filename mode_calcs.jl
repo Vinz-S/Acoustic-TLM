@@ -10,7 +10,8 @@ function Sabines(x,y,z,α)
     ΡT = 0.161*V/(S*α)
     return ΡT
 end
-Sabines(3,4,2.5,0.25)
+Sabines(3,4,2.5,1-0.25)
+Sabines(3,4,2.5,1-0.8)
 
 Analysis.analytic_cubic_resonance(3,4,2.5,343)
 

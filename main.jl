@@ -8,9 +8,9 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config filegp
-config_name = "prop_test_cart_20 short" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+config_name = "Chirp resonances" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile("configs/"*config_name*".toml")
-c = configs["c"]/sqrt(3) #speed of sound, multiplied by sqrt(3) to account for the 3D mesh
+c = configs["c"] #speed of sound, multiplied by sqrt(3) to account for the 3D mesh
 
 #creating/loading mesh_file
 #mesh_file = configs["mesh"]["filename"]
