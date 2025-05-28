@@ -3,13 +3,13 @@ c = 343
 #duration = 0.05 #in seconds, aiming for 4 reflections between the most distant walls
 duration = 0.51 #in seconds, chosen using the rooms reverberation time and chirp length
 [mesh]
-filename = "3x4x2,5_cartres_mesh" #.jld2 added by script
-type = "Cartesian" #Types: "Tetraheder" "Cartesian"
+filename = "T_3x4x2.5_0.1tll" #.jld2 added by script
+type = "Tetraheder" #Types: "Tetraheder" "Cartesian"
 	[mesh.dimensions]
 	x = 3.0
 	y = 4.0
 	z = 2.5
-	tll = 0.25 #Aiming for right under 10 Δl at 150Hz
+	tll = 0.1 #Aiming for right under 10 Δl at 150Hz
 [surfaces]
 #name = ["reflecting", "transmitting"] #This is currently not used by the script
 r_factor = 0.8 #Just a randomly chosen value where sound energy will get reduced over time.
@@ -25,7 +25,7 @@ fh = 300
 T = 0.1
 periods = [1]
 [measurements]
-filename = "chirp reverb" #.jld2 added by script
+filename = "Chirp T_3x4x2.5_0.1tll" #.jld2 added by script
 	[measurements.microphones]
 	x = [1.5, 0.3, 1.8, 1.6] #trying to have it spread out somewhat without following a pattern.
 	y = [2.0, 3.7, 1.2, 1.8]

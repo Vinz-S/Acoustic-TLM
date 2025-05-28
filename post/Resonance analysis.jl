@@ -11,7 +11,7 @@ ax = Axis(fig[1, 1], title = "FFT of measurement point 1")#, xscale = log10)
 stem!(ax, freqs, abs.(F), markersize = 10) =#
 
 ###First resonance test
-config_name = "Chirp resonances"
+config_name = "Chirp C_3x4x2.5_0.1tll"
 configs = TOML.parsefile("configs/"*config_name*".toml")
 dimensions = configs["mesh"]["dimensions"]["x"], configs["mesh"]["dimensions"]["y"], configs["mesh"]["dimensions"]["z"]
 
@@ -28,6 +28,7 @@ for (i, f) in enumerate(Analysis.analytic_cubic_resonance(dimensions[1], dimensi
     f = f[1]
     i > 7 ? break : push!(modes, f)
 end
+modes = modes.*1.15
 for i in eachindex(measurements)
     push!(iaxs, Axis(fig[i, 2], title = "Measurement point $(i)", #xscale = log10,
     xminorticksvisible = true, xminorgridvisible = true,

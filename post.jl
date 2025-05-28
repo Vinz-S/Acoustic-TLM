@@ -86,7 +86,7 @@ module Analysis
         return resonances #have them in a dataframe?
     end
     function signal_frequencies(signal, fs, from = nothing, to = nothing)
-        n = 2^(ceil(Int, log2(length(signal)))+5) # Calculate the next power of 2
+        n = 2*2^(ceil(Int, log2(length(signal)))+5) # Calculate the next power of 2
         padded_signal = vcat(signal, zeros(n - length(signal))) # Zero pad the signal
         F = (fftshift(abs.(fft(padded_signal))))
         freqs = fftshift(fftfreq(length(padded_signal), fs))
