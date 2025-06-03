@@ -11,7 +11,7 @@ ax = Axis(fig[1, 1], title = "FFT of measurement point 1")#, xscale = log10)
 stem!(ax, freqs, abs.(F), markersize = 10) =#
 
 ###First resonance test
-config_name = "Chirp C_3x4x2.5_0.1tll"
+config_name = "Chirp T_3x4x2.5_0.25tll"
 configs = TOML.parsefile("configs/"*config_name*".toml")
 dimensions = configs["mesh"]["dimensions"]["x"], configs["mesh"]["dimensions"]["y"], configs["mesh"]["dimensions"]["z"]
 
@@ -26,7 +26,7 @@ Fs = [[], 1:2]
 modes = []
 for (i, f) in enumerate(Analysis.analytic_cubic_resonance(dimensions[1], dimensions[2], dimensions[3], configs["c"]))
     f = f[1]
-    i > 7 ? break : push!(modes, f)
+    i > 10 ? break : push!(modes, f)
 end
 modes = modes.*1.15
 for i in eachindex(measurements)
@@ -38,7 +38,7 @@ for i in eachindex(measurements)
     xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5), ylabel = "Amplitude"))
     # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
-    freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[i]), fs, 20, 150) #test with the first measurement point
+    freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[i]), fs, 20, 500) #test with the first measurement point
     push!(Fs[1], F) #average frequency response
     stairs!(faxs[i], freqs, F, step=:center)#, markersize = 10)
     vlines!(faxs[i], modes, color = :red)
@@ -71,7 +71,7 @@ i = length(iaxs) + 1
     xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5), xlabel = "Frequency [Hz]", ylabel = "Amplitude"))
     # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
-    freqs, F = Analysis.signal_frequencies(Vector{Float64}([source[i][2] for i in eachindex(source)]), fs, 20, 150) #test with the first measurement point
+    freqs, F = Analysis.signal_frequencies(Vector{Float64}([source[i][2] for i in eachindex(source)]), fs, 20, 500) #test with the first measurement point
     stairs!(faxs[i], freqs, F, step=:center)#, markersize = 10)
     # xlims!(faxs[i], 0, 250)
     display(fig)

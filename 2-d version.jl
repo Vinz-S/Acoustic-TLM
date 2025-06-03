@@ -205,7 +205,7 @@ for i in 0:iterations
     timestamp = i/20
     Solver.inbound!(n, reflection_factor = 0)
     Solver.on_node!(n, timestamp)
-    i <= 60 ? n[followed_nodes[1]].on_node += sin(2*pi*timestamp) : nothing
+    i <= 20 ? n[followed_nodes[1]].on_node += sin(2*pi*timestamp) : nothing
     Solver.outbound!(n)
     #i <= 120 ? n[followed_nodes[1]].outbound[4] += sin(2*pi*timestamp) : nothing
     #i <= 60 ? n[followed_nodes[1]].outbound .+= sin(2*pi*timestamp) : nothing
@@ -217,7 +217,7 @@ for i in 0:iterations
     end
 end
 
-#= positions = []
+positions = []
 for node in followed_nodes
     push!(positions, (n[node].x, n[node].y))
 end
@@ -234,4 +234,4 @@ for i in 1:Int(length(followed_nodes)/2)
     # lines!(axo[i], outbounds[i], color = :green)
 end
 #save("results/2-d sine wave.pdf", fig)
-fig =#
+fig
