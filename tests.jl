@@ -2,28 +2,29 @@
 include("mesh-generator.jl")
 include("TLM-solver.jl")
 include("post.jl")
+using GLMakie
 ###Testing the modules
-#@time n, tree = Generator.nodes((8.0,8.0,6.0); crystal = "Cartesian", transmission_line_length = 1.0)# sqrt(3));
+@time n, tree = Generator.nodes((8.0,8.0,6.0))#; crystal = "Cartesian", transmission_line_length = 1.0)# sqrt(3));
 #@time n, tree = Generator.sphere(3.5; crystal = "Tetraheder", transmission_line_length = 0.1);
 
 #Saving_dicts.to_text(n, "spherenodes")
 #Saving_dicts.to_jld2(n, tree, "demo") #tested in console using display(load("demo.jld2", "nodes"))
 
-#= 
+
 #Visually seeing that the coordinates are correct:
  function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
     scatter!(ax3d, [node.x for node in values(nodes)], [node.y for node in values(nodes)], [node.z for node in values(nodes)], markersize = 10)
     display(fig)
-    #transmission_lines = [(node.x, node.y, node.z, nodes[neighbour].x, nodes[neighbour].y, nodes[neighbour].z) for node in values(nodes) for neighbour in filter!(v->v!=0, node.neighbours)]
-    # for line in transmission_lines
-    #     lines!(ax3d, [line[1], line[4]], [line[2], line[5]], [line[3], line[6]], color = :blue)
-    # end
+    transmission_lines = [(node.x, node.y, node.z, nodes[neighbour].x, nodes[neighbour].y, nodes[neighbour].z) for node in values(nodes) for neighbour in filter!(v->v!=0, node.neighbours)]
+    for line in transmission_lines
+        lines!(ax3d, [line[1], line[4]], [line[2], line[5]], [line[3], line[6]], color = :blue)
+    end
     return fig
 end
 
-f = show_mesh(n) =#
+f = show_mesh(n)
 
 #= for key in keys(n)
     n[key].outbound = [i[1] for i = enumerate(n[key].neighbours)]
@@ -54,6 +55,7 @@ record(fig, "vid_results/tet_prop_check.mp4", 0:iterations, framerate = 24) do f
     borders = lattice[2]
 end =#
 
+#= 
 ### Visually checking wave propagation with dirac pulse
 using GLMakie
 using JLD2
@@ -107,7 +109,7 @@ function show_mesh(nodes) #This function is very slow on anything more than a fe
     return fig
 end
 
-f = show_mesh(n)
+f = show_mesh(n) =#
 
 #= fig = Figure()
 ax = Axis(fig[1, 1], title = "Source output")

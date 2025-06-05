@@ -42,6 +42,7 @@ module Generator
         scale = transmission_line_length/Blocks.transmission_line_length[crystal]
         transmission_line_length = scale*Blocks.transmission_line_length[crystal]
         no_branches = Blocks.no_branches[crystal]
+        wall_margin = (crystal == "Cartesian" ? transmission_line_length/2 : (crystal == "Tetraheder" ? transmission_line_length/(2*sqrt(3)) : throw(ErrorException("Unknown crystal type")))) #The initial margin to the boundary
         crystal = scale_crystal(Blocks.crystal[crystal], scale)
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
@@ -52,9 +53,9 @@ module Generator
                 for z = 1:ceil(dimensions[3]/crystal_size)
                     for i = eachindex(crystal)
                         #Accuracy is reduced to mitigate rounding errors, earlier prints showed an original accuracy of 17 digits
-                        push!(coordinates, (round(crystal[i][1]+(x-1)*crystal_size + transmission_line_length/2, sigdigits=accuracy), 
-                                            round(crystal[i][2]+(y-1)*crystal_size + transmission_line_length/2, sigdigits=accuracy), 
-                                            round(crystal[i][3]+(z-1)*crystal_size + transmission_line_length/2, sigdigits=accuracy)))
+                        push!(coordinates, (round(crystal[i][1]+(x-1)*crystal_size + wall_margin, sigdigits=accuracy), 
+                                            round(crystal[i][2]+(y-1)*crystal_size + wall_margin, sigdigits=accuracy), 
+                                            round(crystal[i][3]+(z-1)*crystal_size + wall_margin, sigdigits=accuracy)))
                     end
                 end
             end
