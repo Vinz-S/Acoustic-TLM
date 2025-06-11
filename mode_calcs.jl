@@ -7,8 +7,8 @@ function Sabines(x,y,z,α)
     #α is the absorption coefficient
     V = x*y*z
     S = 2*(x*y + y*z + z*x)
-    ΡT = 0.161*V/(S*α)
-    return ΡT
+    RT = 0.161*V/(S*α)
+    return RT
 end
 Sabines(3,4,2.5,1-0.25)
 Sabines(3,4,2.5,1-0.8)

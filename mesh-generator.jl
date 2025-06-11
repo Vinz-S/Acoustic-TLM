@@ -29,9 +29,9 @@ module Generator
         y::Float64
         z::Float64
         neighbours::Vector{Int64}
-        inbound::Vector{Float64} #The indexes of the vectors correspond to the neighbours indexes
-        outbound::Vector{Float64}
-        on_node::Float64
+        inbound::Vector{Float64}    # The indices in the vectors
+        outbound::Vector{Float64}   # correspond to the 
+        on_node::Float64            # neighbours' indices
     end;
     function scale_crystal(crystal::Vector{Tuple{Int64, Int64, Int64}}, scale::Float64)
         return [(scale*crystal[i][1], scale*crystal[i][2], scale*crystal[i][3]) for i = eachindex(crystal)]

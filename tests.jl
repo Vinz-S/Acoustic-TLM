@@ -4,15 +4,15 @@ include("TLM-solver.jl")
 include("post.jl")
 using GLMakie
 ###Testing the modules
-@time n, tree = Generator.nodes((8.0,8.0,6.0))#; crystal = "Cartesian", transmission_line_length = 1.0)# sqrt(3));
+@time n, tree = Generator.nodes((3.0,3.0,2.0))#; crystal = "Cartesian", transmission_line_length = 1.0)# sqrt(3));
 #@time n, tree = Generator.sphere(3.5; crystal = "Tetraheder", transmission_line_length = 0.1);
 
-#Saving_dicts.to_text(n, "spherenodes")
+Saving_dicts.to_text(n, "results/small_mesh") #Saving the nodes to a text file
 #Saving_dicts.to_jld2(n, tree, "demo") #tested in console using display(load("demo.jld2", "nodes"))
 
-
+#=
 #Visually seeing that the coordinates are correct:
- function show_mesh(nodes) #This function is very slow on anything more than a few crystals
+function show_mesh(nodes) #This function is very slow on anything more than a few crystals
     fig = Figure()
     ax3d = Axis3(fig[1,1], title = "Tetraheder points")
     scatter!(ax3d, [node.x for node in values(nodes)], [node.y for node in values(nodes)], [node.z for node in values(nodes)], markersize = 10)
@@ -25,6 +25,7 @@ using GLMakie
 end
 
 f = show_mesh(n)
+=#
 
 #= for key in keys(n)
     n[key].outbound = [i[1] for i = enumerate(n[key].neighbours)]
