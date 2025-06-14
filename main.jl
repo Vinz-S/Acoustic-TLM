@@ -8,7 +8,7 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config filegp
-config_name = "Chirp T_3x4x2.5_0.25tll" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+config_name = "prop_test_cart_20" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
 configs = TOML.parsefile("configs/"*config_name*".toml")
 c = configs["c"] #speed of sound, multiplied by sqrt(3) to account for the 3D mesh
 
@@ -83,8 +83,8 @@ measurements = [[] for i in eachindex(measurement_points)] # The pressure values
 #run simulation
 #Beginning from 0 creates an adittional bugged progressbar, workaround not found so far
 its = ProgressBar(0:ceil(configs["duration"]/it_time)+1) #iterations
-wavelengths = [c/freq for freq in sources["freq"]] #wavelength
-wtll = (wavelengths.^-1).*tll #tll in wavelengths
+#wavelengths = [c/freq for freq in sources["freq"]] #wavelength
+#wtll = (wavelengths.^-1).*tll #tll in wavelengths
 #@time begin
 for i in its
     Solver.update_tlm!(mesh, i*it_time, reflection_factor = configs["surfaces"]["r_factor"])

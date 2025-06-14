@@ -13,9 +13,10 @@ data = load(codepath*"results/"*configs["measurements"]["filename"]*".jld2", "me
 source = load(codepath*"results/"*configs["measurements"]["filename"]*".jld2", "source output")[1][1]
 λ = c/f #wavelength
 distances = [0.5, 1] #in wavelengths
-ys = 0:it_time:(length(data[1])-1)*it_time
+
+ys = 0:it_time/sqrt(3):(length(data[1])-1)*it_time/sqrt(3)
 per = 1/f #wave period
-intervals =  [[i*per-per , i*per+5*per]*sqrt(3) for i in distances]
+intervals =  [[i*per-per , i*per+2*per] for i in distances]
 
 #Plotting signals
 fig = Figure()

@@ -1,21 +1,21 @@
 #Configuration file example, following TOML
 c = 343	
-duration = 0.0045 #in seconds
+duration = 0.003 #in seconds
 [mesh]
-filename = "1x1x1_20_cart_mesh" #.jld2 added by script
+filename = "1.15x0.95x0.95_20_cart_mesh" #.jld2 added by script
 type = "Cartesian" #Types: "Tetraheder" "Cartesian"
 	[mesh.dimensions]
-	x = 1.0
-	y = 1.0
-	z = 1.0
+	x = 1.15 #0.25+0.8
+	y = 0.95 #0.25+0.7
+	z = 0.95 #0.25+0.7
 	tll = 0.005
 [surfaces] #This is currently not used by the script
-name = ["reflecting", "transmitting"]
-r_factor = [1, 0]
+name = 1
+r_factor = 1
 [sources]
-x = [0.3]
-y = [0.3]
-z = [0.3]
+x = [0.25]
+y = [0.25]
+z = [0.25]
 amp = [10]
 freq = [3430] #kHz
 type = ["sine"] #Types : "sine"	"dirac"
@@ -23,9 +23,9 @@ periods = [1]
 [measurements]
 filename = "cart_propagation_20" #.jld2 added by script
 	[measurements.microphones]
-	x = [0.4, 0.6, 0.9, 0.37071, 0.51213, 0.72426, 0.35, 0.45, 0.6]
-	y = [0.3, 0.3, 0.3, 0.37071, 0.51213, 0.72426, 0.35, 0.45, 0.6]
-	z = [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.37071, 0.51213, 0.72426]
+	x = [0.35, 0.55, 0.85, 0.32071, 0.46213, 0.67426, 0.3, 0.4, 0.55]
+	y = [0.25, 0.25, 0.25, 0.32071, 0.46213, 0.67426, 0.3, 0.4, 0.55]
+	z = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.32071, 0.46213, 0.67426]
 	#From the source these are all in polar coordinates:
 	#r: 0.1, 0.3 and 0.6; θ: 90, 90, 45 ; Φ: 0 , 45, 45
 
