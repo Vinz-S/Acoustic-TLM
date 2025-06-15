@@ -1,3 +1,8 @@
+include("post.jl")
+include("mesh-generator.jl")
+using SpecialFunctions
+using Peaks
+using GLMakie
 #Calculating time spent for 4 reflections between the longest apart walls.
 (4*4)/343
 
@@ -17,3 +22,10 @@ Analysis.analytic_cubic_resonance(3,4,2.5,343)
 
 SetupCalculations.tllByResolution(10, 343, 150)
 
+
+SphericalBesselJ(nu, x) = sqrt(π/(2*x)) * besseljx(nu + 0.5, x)
+x = 0:0.001:50
+y = SphericalBesselJ(0, x)
+
+fig = Figure()
+ax = Axis(fig[1, 1], title = "Spherical Bessel Function J0(x)", xlabel = "x", ylabel = "J0(x)")

@@ -68,6 +68,8 @@ end
 module Analysis
     using DataStructures
     using FFTW
+    using SpecialFunctions
+    using Peaks
     function analytic_cubic_resonance(x, y, z, c)
         resonances =  SortedDict{Float64, Vector{String}}()
         for l = 0:3, m = 0:3, n = 0:3
@@ -85,6 +87,58 @@ module Analysis
         delete!(resonances, 0.0) #remove the zero frequency resonance
         return resonances #have them in a dataframe?
     end
+
+    function analytic_spherical_resonance(r, c)
+        function findextrema(y)
+            extremai = []
+            extremah = []
+            display(y[2])#y[1] The besselfunction always outputs NaN as the first value
+            y[2] > 0.99 ? (push!(extremai, 2); push!(extremah, y[2])) : nothing
+            maxi, maxh = findmaxima(y)
+            mini, minh = findminima(y)
+            order = maxi[1] < mini[1] ? true : false #looking if the first extrema is a maxima
+            for i in eachindex(order ? maxi : mini)
+                if order
+                    push!(extremai, maxi[i])
+                    push!(extremah, maxh[i])
+                    if i <= length(mini)
+                        push!(extremai, mini[i])
+                        push!(extremah, minh[i])
+                    end
+                else
+                    push!(extremai, mini[i])
+                    push!(extremah, minh[i])
+                    if i <= length(maxi)
+                        push!(extremai, maxi[i])
+                        push!(extremah, maxh[i])
+                    end
+                end
+            end
+            return extremai, extremah
+        end
+        SphericalBesselJ(nu, x) = sqrt(π/(2*x)) * besseljx(nu + 0.5, x)
+        function znl(n,l) #calculates a matrix of z up to the given dimensions
+            z = []
+            interval = 0.0001
+            x = 0:interval:50
+            for i in 0:l
+                y = [SphericalBesselJ(i, x) for x in x]
+                indices, heights = findextrema(y)
+                zs = indices.*interval;
+                push!(z, [zs[i] for i in 1:n+1])
+            end
+            return z  #accessed i as z[l+1][n+1]
+        end
+        resonances = SortedDict{Float64, Vector{String}}()
+        z = znl(7,7)
+        for l = 0:7, n = 0:7
+            mode = "$(l)$(n)" # The modes do not seem to be entirely correct, frequencies however are
+            f = round((z[l+1][n+1]*c)/(2*pi*r), digits = 2)
+            haskey(resonances, f) ? (push!(resonances[f], mode)) : push!(resonances, f => [mode])
+        end
+        return resonances #have them in a dataframe?
+    end
+
     function signal_frequencies(signal, fs, from = nothing, to = nothing)
         n = 2*2^(ceil(Int, log2(length(signal)))+5) # Calculate the next power of 2
         padded_signal = vcat(signal, zeros(n - length(signal))) # Zero pad the signal

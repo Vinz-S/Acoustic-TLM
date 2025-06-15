@@ -3,11 +3,13 @@ include("mesh-generator.jl")
 include("TLM-solver.jl")
 include("post.jl")
 using GLMakie
+using SpecialFunctions
+using Peaks
 ###Testing the modules
-@time n, tree = Generator.nodes((3.0,3.0,2.0))#; crystal = "Cartesian", transmission_line_length = 1.0)# sqrt(3));
-#@time n, tree = Generator.sphere(3.5; crystal = "Tetraheder", transmission_line_length = 0.1);
+# @time n, tree = Generator.nodes((3.0,3.0,2.0))#; crystal = "Cartesian", transmission_line_length = 1.0)# sqrt(3));
+# #@time n, tree = Generator.sphere(3.5; crystal = "Tetraheder", transmission_line_length = 0.1);
 
-Saving_dicts.to_text(n, "results/small_mesh") #Saving the nodes to a text file
+# Saving_dicts.to_text(n, "results/small_mesh") #Saving the nodes to a text file
 #Saving_dicts.to_jld2(n, tree, "demo") #tested in console using display(load("demo.jld2", "nodes"))
 
 #=
@@ -171,3 +173,63 @@ xlims!(ax2, 0, nyquist)
 
 display(fig)
 =#
+
+### Testing the different parameters needed for the spherical resonances
+#= function findextrema(y)
+            extremai = []
+            extremah = []
+            display(y[2])#y[1] The besselfunction always outputs NaN as the first value
+            y[2] > 0.99 ? (push!(extremai, 2); push!(extremah, y[2])) : nothing
+            maxi, maxh = findmaxima(y)
+            mini, minh = findminima(y)
+            order = maxi[1] < mini[1] ? true : false #looking if the first extrema is a maxima
+            for i in eachindex(order ? maxi : mini)
+                if order
+                    push!(extremai, maxi[i])
+                    push!(extremah, maxh[i])
+                    if i <= length(mini)
+                        push!(extremai, mini[i])
+                        push!(extremah, minh[i])
+                    end
+                else
+                    push!(extremai, mini[i])
+                    push!(extremah, minh[i])
+                    if i <= length(maxi)
+                        push!(extremai, maxi[i])
+                        push!(extremah, maxh[i])
+                    end
+                end
+            end
+            return extremai, extremah
+        end
+
+SphericalBesselJ(nu, x) = sqrt(π/(2*x)) * besseljx(nu + 0.5, x)
+
+interval = 0.01
+x = 0:interval:50
+y = [SphericalBesselJ(0, x) for x in x]
+
+fig = Figure()
+ax = Axis(fig[1, 1], title = "Spherical Bessel Function J0(x)", xlabel = "x", ylabel = "J0(x)")
+stairs!(ax, x, y; step=:center)
+indices, heights = findextrema(y)
+scatter!(ax, x[indices], heights, color = :red, markersize = 10, label = "Maxima")
+display(fig)
+extremax = indices.*interval;
+
+function z(n,l) #calculates a matrix of z up to the given dimensions
+    z = Matrix
+    interval = 0.01
+    x = 0:interval:50
+    for i in 0:l
+        y = [SphericalBesselJ(i, x) for x in x]
+        indices, heights = findextrema(y)
+        zs = indices.*interval;
+        push!(z, [zs[i] for i in 1:n])
+    end
+    return z
+end
+
+g=z(5,2) =#
+
+Analysis.analytic_spherical_resonance(0.116, 343)

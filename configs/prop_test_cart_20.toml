@@ -19,7 +19,7 @@ z = [0.25]
 amp = [10]
 freq = [3430] #kHz
 type = ["sine"] #Types : "sine"	"dirac"
-periods = [1]
+periods = [3]
 [measurements]
 filename = "cart_propagation_20" #.jld2 added by script
 	[measurements.microphones]
