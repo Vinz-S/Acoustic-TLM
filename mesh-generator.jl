@@ -46,7 +46,7 @@ module Generator
         crystal = scale_crystal(Blocks.crystal[crystal], scale)
         coordinates = Set()
         crystal_size = findmax(crystal[findmax(crystal)[2]])[1]
-        accuracy = 14
+        accuracy = 13
         iter = ProgressBar(1:ceil(dimensions[1]/crystal_size))
         for x = iter
             for y = 1:ceil(dimensions[2]/crystal_size)
