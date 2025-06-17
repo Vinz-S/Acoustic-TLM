@@ -16,7 +16,7 @@ distances = [1, 3, 6] #in wavelengths
 
 ys = 0:it_time/sqrt(3):(length(data[1])-1)*it_time/sqrt(3)
 per = 1/f #wave period
-intervals =  [[i*per-per , i*per+2*per] for i in distances]
+intervals =  [[i*per-per , i*per+4*per] for i in distances]
 
 #Plotting signals
 fig = Figure()

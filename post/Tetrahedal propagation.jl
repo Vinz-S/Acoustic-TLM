@@ -4,7 +4,7 @@ using FileIO
 using TOML  
 codepath = "/home/vinzenz/Documents/Master/Acoustic-TLM/"
 include(codepath*"post.jl")
-configs = TOML.parsefile(codepath*"configs/prop_test_tetra_20 retry.toml")
+configs = TOML.parsefile(codepath*"configs/prop_test_tetra_20.toml")
 c = configs["c"]
 f = configs["sources"]["freq"][1]
 tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
@@ -13,9 +13,9 @@ data = load(codepath*"results/"*configs["measurements"]["filename"]*".jld2", "me
 λ = c/f #wavelength
 distances = [1, 3, 6] #in wavelengths
 
-ys = 0:it_time:(length(data[1])-1)*it_time
+ys = 0:it_time/sqrt(3):(length(data[1])-1)*it_time/sqrt(3)
 per = 1/f #wave period
-intervals =  [[i*per-per , i*per+2*per].*sqrt(3) for i in distances]
+intervals =  [[i*per-per , i*per+4*per] for i in distances]
 
 fig = Figure()
 ax1a = Axis(fig[1, 1], title = "On-axis, 1λ")

@@ -2,15 +2,19 @@ module Visualization
     using GLMakie
     using NearestNeighbors
     using StaticArrays
-    function show_mesh(nodes) #This function is very slow on anything more than a few crystals
-        fig = Figure()
-        ax3d = Axis3(fig[1,1], title = "grid Visualization")
-        scatter!(ax3d, [node.x for node in values(nodes)], [node.y for node in values(nodes)], [node.z for node in values(nodes)], markersize = 10)
+    function show_mesh(nodes; title = "", fontsize = 18, hidedecorations = false, hidespines = false, azi = 1.275pi, elev = pi/8) #This function is very slow on anything more than a few crystals
+        green = Makie.wong_colors()[3]
+        pink = Makie.wong_colors()[4]
+        fig = Figure(fontsize = fontsize)
+        ax3d = Axis3(fig[1,1], title = title, elevation = elev, azimuth = azi, aspect = (1,1,1))
+        scatter!(ax3d, [node.x for node in values(nodes)], [node.y for node in values(nodes)], [node.z for node in values(nodes)], markersize = 10, color = pink)
         display(fig)
         transmission_lines = [(node.x, node.y, node.z, nodes[neighbour].x, nodes[neighbour].y, nodes[neighbour].z) for node in values(nodes) for neighbour in filter!(v->v!=0, node.neighbours)]
         for line in transmission_lines
-            lines!(ax3d, [line[1], line[4]], [line[2], line[5]], [line[3], line[6]], color = :blue)
+            lines!(ax3d, [line[1], line[4]], [line[2], line[5]], [line[3], line[6]], color = green)
         end
+        hidespines ? hidespines!(ax3d) : nothing
+        hidedecorations ? hidedecorations!(ax3d) : nothing
         return fig
     end
 
