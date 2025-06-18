@@ -1,6 +1,4 @@
 testing.jl
 *.jld2
 *.txt
-illustrations
 meshes
-vid_results
