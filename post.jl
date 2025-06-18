@@ -25,6 +25,7 @@ module Visualization
         end
         idxs, dists = knn(tree, [point[1], point[2], point[3]], 10)
         filter!(d->d<tll*1.001, dists)
+        length(dists) == 0 ? (return 0.0) : nothing #if no nodes are within the distance, return 0
         return sum([nodes[idxs[i]].on_node for i = eachindex(dists)])/length(dists)
             #calculate average here, trilinear interpolation? https://en.wikipedia.org/wiki/Multivariate_interpolation#Irregular_grid_(scattered_data)
             #use average as it shold be sufficient for fine grids
@@ -154,4 +155,16 @@ module Analysis
         to === nothing ? nothing : posi_i_n = findlast(<=(to), freqs)
         return freqs[pos_i_0:posi_i_n], F[pos_i_0:posi_i_n]
     end
+end
+
+module Colours
+using CairoMakie
+export blue, orange, green, pink, lightblue, redish, yellow
+blue = Makie.wong_colors()[1]
+orange = Makie.wong_colors()[2]
+green = Makie.wong_colors()[3]
+pink = Makie.wong_colors()[4]
+lightblue = Makie.wong_colors()[5]
+redish = Makie.wong_colors()[6]
+yellow = Makie.wong_colors()[7]
 end

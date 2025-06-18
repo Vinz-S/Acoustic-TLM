@@ -1,7 +1,8 @@
-#Prosjektoppgave 2024, non-cartesian dictionary based TLM method by Vinzenz Schöberle
+#Prosjektoppgave 2024, non-cartesian dictionary based TLM method by Vinzenz Schöberle (modified May 2025)
 
 #  using GLMakie
 #  GLMakie.activate!(inline=false)
+include("post.jl"); import .Colours: blue, orange, green, pink, lightblue, redish, yellow
 using CairoMakie
 # using JLD2
 # using FileIO
@@ -385,7 +386,7 @@ on_nodes = [[] for i in 1:length(followed_nodes)]
     #running the animation
     ite::Int64 = 0 
     while ite < iterations
-        sineImpulse([200, 100], -1, ite, periods = 3)
+        sineImpulse([200, 100], 1, ite, periods = 3)
         pressureupdate(nodes, ite)
         for (i, node) in enumerate(followed_nodes)
             push!(on_nodes[i], nodes[node].pressure)
@@ -398,18 +399,27 @@ positions = []
 for node in followed_nodes
     push!(positions, nodes[node].position)
 end
+
 fig = Figure(size = (1200, 800), resolution = (1200, 800))
 range1 = 1:ceil(Int64, n_followed/2)
 range2 = ceil(Int64, n_followed/2)+1:n_followed
-ax1 = [Axis(fig[i, 1], title = "On_node "*string(positions[i])) for i in range1]
+ax1 = [Axis(fig[i, 1], title = "On_node "*string(positions[i]),ylabel = "Amplitude") for i in range1]
 ax2 = [Axis(fig[i-ceil(Int64, n_followed/2), 2], title = "On_node "*string(positions[i])) for i in range2]
+xs = 0:it_time:(length(on_nodes[1])-1)*it_time
+per = 1 #wave period
+distances = [i*30 for i in 0:length(n_followed)-1]
+intervals =  [[i*per-per , i*per+4*per].*sqrt(2) for i in distances]
 for i in 1:Int(length(followed_nodes)/2)
-    lines!(ax1[i], on_nodes[range1[i]], color = :red)
-    try lines!(ax2[i], on_nodes[range2[i]], color = :red)
+    lines!(ax1[i], xs, on_nodes[range1[i]], color = blue)
+    try lines!(ax2[i], xs, on_nodes[range2[i]], color = blue)
     catch
     end   
+    if i == length(ax1)
+        ax1[i].xlabel = "Time [s]"
+        ax2[i].xlabel = "Time [s]"
+    end   
 end
-#save("On_axis.pdf", fig)
+save("results/cartesian, 2-d.pdf", fig)
 display(fig)
 
 try

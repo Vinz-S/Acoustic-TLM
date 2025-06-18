@@ -1,6 +1,7 @@
 ###This file is supposed to conatain the module for the pre-processo
-#using CairoMakie
-using GLMakie
+include("post.jl"); import .Colours: blue, orange, green, pink, lightblue, redish, yellow
+using CairoMakie
+#using GLMakie
 using NearestNeighbors
 
 module Blocks #Coordinates of a base block x,y
@@ -195,7 +196,7 @@ function find_nearest_node(tree, position)
 end
 
 n_followed = 10
-followed_nodes = [Int(find_nearest_node(tree, [199.5+12*i, 99.5])) for i in 0:n_followed-1]
+followed_nodes = [Int(find_nearest_node(tree, [199.5+30*i, 99.5])) for i in 0:n_followed-1]
 #inbounds = [[] for i in 1:length(followed_nodes)]
 on_nodes = [[] for i in 1:length(followed_nodes)]
 #outbounds = [[] for i in 1:length(followed_nodes)]
@@ -205,7 +206,7 @@ for i in 0:iterations
     timestamp = i/20
     Solver.inbound!(n, reflection_factor = 0)
     Solver.on_node!(n, timestamp)
-    i <= 20 ? n[followed_nodes[1]].on_node += sin(2*pi*timestamp) : nothing
+    i <= 60 ? n[followed_nodes[1]].on_node += sin(2*pi*timestamp) : nothing
     Solver.outbound!(n)
     #i <= 120 ? n[followed_nodes[1]].outbound[4] += sin(2*pi*timestamp) : nothing
     #i <= 60 ? n[followed_nodes[1]].outbound .+= sin(2*pi*timestamp) : nothing
@@ -224,14 +225,23 @@ end
 fig = Figure(size = (1200, 800), resolution = (1200, 800))
 range1 = 1:ceil(Int64, n_followed/2)
 range2 = ceil(Int64, n_followed/2)+1:n_followed
-ax1 = [Axis(fig[i, 1], title = "On_node "*string(positions[i])) for i in range1]
+ax1 = [Axis(fig[i, 1], title = "On_node "*string(positions[i]),ylabel = "Amplitude") for i in range1]
 ax2 = [Axis(fig[i-ceil(Int64, n_followed/2), 2], title = "On_node "*string(positions[i])) for i in range2]
-for i in 1:Int(length(followed_nodes)/2)
-    lines!(ax1[i], on_nodes[range1[i]], color = :red)
-    try lines!(ax2[i], on_nodes[range2[i]], color = :red)
+it_time = 1/20 #time per iteration
+xs = 0:it_time:(length(on_nodes[1])-1)*it_time
+per = 1 #wave period
+distances = [i*30 for i in 0:length(n_followed)-1]
+intervals =  [[i*per-per , i*per+4*per].*sqrt(2) for i in distances]
+for i in 1:Int(length(ax2))
+    lines!(ax1[i], xs, on_nodes[range1[i]], color = blue)
+    try lines!(ax2[i], xs, on_nodes[range2[i]], color = blue)
     catch
     end   
+    if i == length(ax1)
+        ax1[i].xlabel = "Time [s]"
+        ax2[i].xlabel = "Time [s]"
+    end
     # lines!(axo[i], outbounds[i], color = :green)
 end
-#save("results/2-d sine wave.pdf", fig)
+save("results/2-d version.pdf", fig)
 fig
