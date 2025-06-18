@@ -1,8 +1,6 @@
 testing.jl
-*.png
 *.jld2
 *.txt
-*.mp4
 illustrations
 meshes
 vid_results
