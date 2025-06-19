@@ -23,10 +23,9 @@ module Visualization
             sorted_keys = sort([node[1] for node in nodes])
             tree = KDTree([SVector{3, Float64}(nodes[key].x, nodes[key].y, nodes[key].z) for key in sorted_keys])
         end
-        idxs, dists = knn(tree, [point[1], point[2], point[3]], 10)
-        filter!(d->d<tll*1.001, dists)
-        length(dists) == 0 ? (return 0.0) : nothing #if no nodes are within the distance, return 0
-        return sum([nodes[idxs[i]].on_node for i = eachindex(dists)])/length(dists)
+        idxs = inrange(tree, [point[1], point[2], point[3]], tll*1.001)
+        length(idxs) == 0 ? (return 0.0) : nothing #if no nodes are within the distance, return 0
+        return sum([nodes[idxs[i]].on_node for i = eachindex(idxs)])/length(idxs)
             #calculate average here, trilinear interpolation? https://en.wikipedia.org/wiki/Multivariate_interpolation#Irregular_grid_(scattered_data)
             #use average as it shold be sufficient for fine grids
     end
@@ -46,21 +45,21 @@ module Visualization
             lattice = zeros(lattice_dims[1], lattice_dims[2])
             for i in 1:lattice_dims[1], j in 1:lattice_dims[2]
                 #Adding a multiplication factor to only use the one node if there is one really close
-                lattice[i, j] = point_avg(nodes, (cross_height-tll/2, i-tll/2, j-tll/2), tll*0.95, tree)
+                lattice[i, j] = point_avg(nodes, (cross_height, i-tll/2, j-tll/2), tll*0.95, tree)
             end
         elseif axis == "y" || axis == "Y"
             cross_height > mesh_dimensions[2] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
             lattice_dims = (ceil(mesh_dimensions[1]/tll), ceil(mesh_dimensions[3]/tll))
             lattice = zeros(lattice_dims[1], lattice_dims[2])
             for i in 1:lattice_dims[1], j in 1:lattice_dims[2]
-                lattice[i, j] = point_avg(nodes, (i-tll/2, cross_height-tll/2, j-tll/2), tll*0.95, tree)
+                lattice[i, j] = point_avg(nodes, (i-tll/2, cross_height, j-tll/2), tll*0.95, tree)
             end
         elseif axis == "z" || axis == "Z"
             cross_height > mesh_dimensions[3] ? throw(ErrorException("The cross section height is higher than the meshes axis length")) : nothing
             lattice_dims = (ceil(mesh_dimensions[1]/tll), ceil(mesh_dimensions[2]/tll))
             lattice = zeros(Int(lattice_dims[1]), Int(lattice_dims[2]))
             for i in 1:Int(lattice_dims[1]), j in 1:Int(lattice_dims[2])
-                lattice[i, j] = point_avg(nodes, (i-tll/2, j-tll/2, cross_height-tll/2), tll*0.95, tree)
+                lattice[i, j] = point_avg(nodes, (i-tll/2, j-tll/2, cross_height), tll*0.95, tree)
             end
         else
             throw(ErrorException("Unknown axis: "*axis))
