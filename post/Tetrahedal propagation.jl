@@ -10,14 +10,18 @@ f = configs["sources"]["freq"][1]
 tll = configs["mesh"]["dimensions"]["tll"] #transmission line length
 it_time = tll/c #time per iteration
 data = load(codepath*"results/"*configs["measurements"]["filename"]*".jld2", "measurements")
+source = load(codepath*"results/"*configs["measurements"]["filename"]*".jld2", "source output")[1][1]
 λ = c/f #wavelength
 distances = [1, 3, 6] #in wavelengths
 
 xs = 0:it_time/sqrt(3):(length(data[1])-1)*it_time/sqrt(3)
+xs = xs.*0.001 #converting to ms
 per = 1/f #wave period
 intervals =  [[i*per-per , i*per+4*per] for i in distances]
 
-fig = Figure()
+#Plotting signals
+fig = Figure(size = (1200,900))
+supertitle = Label(fig[0, 2], "Tetrahedral", fontsize = 20)
 ax1a = Axis(fig[1, 1], title = "On-axis, 1λ")
 stairs!(ax1a, xs, data[1]; step=:center, color = :blue)
 xlims!(ax1a, intervals[1][1], intervals[1][2])
@@ -54,7 +58,6 @@ stairs!(ax3c, xs, data[9]; step=:center, color = :blue)
 xlims!(ax3c, intervals[3][1], intervals[3][2])
 
 ax1d = Axis(fig[4, 1], title = "source output")
-source = load(codepath*"results/"*configs["measurements"]["filename"]*".jld2", "source output")[1][1]
 stairs!(ax1d, [point[1] for point in source], [point[2] for point in source]; step=:center, color = :red)
 
 display(fig)

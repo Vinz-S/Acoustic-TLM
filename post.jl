@@ -154,9 +154,15 @@ module Analysis
         to === nothing ? nothing : posi_i_n = findlast(<=(to), freqs)
         return freqs[pos_i_0:posi_i_n], F[pos_i_0:posi_i_n]
     end
+
+    function RMS(signal)
+        #Calculates the root mean square of a signal
+        sqrt(sum([x^2 for x in signal])/length(signal))
+    end
 end
 
 module Colours
+#using Makie
 using CairoMakie
 export blue, orange, green, pink, lightblue, redish, yellow
 blue = Makie.wong_colors()[1]
