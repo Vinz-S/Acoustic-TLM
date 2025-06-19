@@ -1,0 +1,28 @@
+#Configuration file example, following TOML
+c = 343	
+duration = 0.0003 #in seconds
+[mesh]
+filename = "0.5x0.5x0.5_20_tetra_mesh" #.jld2 added by script
+type = "Tetraheder" #Types: "Tetraheder" "Cartesian"
+	[mesh.dimensions]
+	x = 0.5 
+	y = 0.5 
+	z = 0.5 
+	tll = 0.005
+[surfaces] #This is currently not used by the script
+name = ["reflecting", "transmitting"] #This is currently not used by the script
+r_factor = 1
+[sources]
+x = [0.25]
+y = [0.25]
+z = [0.25]
+amp = [10]
+freq = [3430] #kHz
+type = ["sine"] #Types : "sine"	"dirac"
+periods = [1]
+[measurements]
+filename = "tet_signal_20" #.jld2 added by script
+	[measurements.microphones]
+	x = [0.25]
+	y = [0.256]
+	z = [0.25]
