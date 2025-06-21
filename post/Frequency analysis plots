@@ -4,6 +4,7 @@ include(codepath*"TLM-solver.jl")
 include(codepath*"mesh-generator.jl")
 using GLMakie
 GLMakie.activate!(inline=false)
+# using CairoMakie
 using TOML
 using JLD2
 using FileIO
@@ -25,11 +26,12 @@ measurements = [load("results/"*configs[i]["measurements"]["filename"]*".jld2", 
 c = configs[1]["c"]*sqrt(3) #speed of sound in the medium
 it_times = [(configs[i]["mesh"]["dimensions"]["tll"]/c) for i in eachindex(configs)] #time per iteration
 fs = [1/it_time for it_time in it_times] #sampling frequency
-fig = Figure(size = (1920, 1080))
+
+width = 1200; height = 900
+fig = Figure(size = (width, height))
 faxs = [] #Frequency response amlitudes
 iaxs = [] #Impulse response amplitudes
 taxs = [0:it_time:(length(measurements[j][1])-1)*it_time for (j, it_time) in enumerate(it_times)] #time axis for the measurements
-#taxs = [0:it_time:(length(measurements[1])-1)*it_time for it_time in it_times] #time axis for the measurements
 Fs = [[[], 1:2] for i in eachindex(configs)]
 modes = []
 for (i, f) in enumerate(Analysis.analytic_cubic_resonance(dimensions[1], dimensions[2], dimensions[3], configs[1]["c"]))
@@ -37,32 +39,28 @@ for (i, f) in enumerate(Analysis.analytic_cubic_resonance(dimensions[1], dimensi
     i > 10 ? break : push!(modes, f)
 end
 
+ABCD = ["A", "B", "C", "D"]
 #modes = modes.*1.15 #correction to adjust lines
 
 for i in eachindex(measurements[1])
-    push!(iaxs, Axis(fig[i, 2], title = "Measurement point $(i)", #xscale = log10,
+    push!(iaxs, Axis(fig[i, 2], title = "Measurement point $(ABCD[i])", #xscale = log10,
     xminorticksvisible = true, xminorgridvisible = true,
-    xminorticks = IntervalsBetween(5)))
+    xminorticks = IntervalsBetween(5), tellwidth = true, width = round(Int, width/4)))
     for j in eachindex(configs)
         stairs!(iaxs[i], taxs[j], measurements[j][i], step=:center, color = colours[j])
     end
     #stairs!(iaxs[i], tax, measurements[i], step=:center)
-    push!(faxs, Axis(fig[i, 1], title = "FFT of measurement point $(i)", xscale = log10,
+    push!(faxs, Axis(fig[i, 1], title = "FFT of measurement point $(ABCD[i])", xscale = log10,
     xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5), ylabel = "Amplitude"))
     # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
     for j in eachindex(configs)
         freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[j][i]), fs[j], min_f, max_f) #test with the first measurement point
         push!(Fs[j][1], F/maximum(F)) #average frequency response
-        stairs!(faxs[i], freqs, F, step=:center, color = colours[j])#, markersize = 10)
+        stairs!(faxs[i], freqs, F/maximum(F), step=:center, color = colours[j])#, markersize = 10)
         Fs[j][2] = freqs
     end
-    #freqs, F = Analysis.signal_frequencies(Vector{Float64}(measurements[i]), fs, min_f, 150) #test with the first measurement point
-    #push!(Fs[1], F/maximum(F)) #average frequency response
-    #stairs!(faxs[i], freqs, F, step=:center)#, markersize = 10)
     vlines!(faxs[i], modes, color = redish)
-    # xlims!(faxs[i], 0, 250)
-    #Fs[2] = freqs
 end
 
 avg_f = [zeros(length(Fs[i][1][1])) for i in eachindex(Fs)]
@@ -71,9 +69,6 @@ for j in eachindex(Fs)
         avg_f[j] .+= Fs[j][1][i]./length(Fs[j][1])
     end
 end
-# for i in eachindex(Fs[1])
-#     avg_f .+= Fs[1][i]./length(Fs[1])
-# end
 
 i = length(iaxs) + 1
     sources = [load("results/"*configs[i]["measurements"]["filename"]*".jld2", "source output")[3][1] for i in eachindex(configs)]
@@ -109,6 +104,6 @@ i = length(iaxs) + 1
     mode = vlines!(faxs[i], modes, color = redish)
     Legend(fig[i, 2],
     [plots;[mode]],
-    [["TLLs per Wavelength: $(resolutions[j])" for j in eachindex(measurements)];["Analytical modal frequencies"]], tellwidth = true)
+    [["TLLs per Wavelength: $(resolutions[j])" for j in eachindex(measurements)];["Analytical modal frequencies"]], tellwidth = false)
 
-#save("results/rooom frequencies2.png", fig)
+# save("results/frequency plot"*crystal*"_"*cavity*"_"*signal*".pdf", fig)

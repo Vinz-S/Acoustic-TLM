@@ -147,7 +147,6 @@ module Analysis
         n = 2*2^(ceil(Int, log2(length(signal)))+5) # Calculate the next power of 2
         padded_signal = vcat(signal, zeros(n - length(signal))) # Zero pad the signal
         F = (fftshift(abs.(fft(padded_signal))))
-        display()
         freqs = fftshift(fftfreq(length(padded_signal), fs))
         pos_i_0 = findfirst(>=(0),freqs) #finding the indices of the positive frequencies
         posi_i_n = length(freqs)
