@@ -96,7 +96,6 @@ module Analysis
         function findextrema(y)
             extremai = []
             extremah = []
-            display(y[2])#y[1] The besselfunction always outputs NaN as the first value
             y[2] > 0.99 ? (push!(extremai, 2); push!(extremah, y[2])) : nothing
             maxi, maxh = findmaxima(y)
             mini, minh = findminima(y)
@@ -137,6 +136,7 @@ module Analysis
         z = znl(7,7)
         for l = 0:7, n = 0:7
             mode = "$(l)$(n)" # The modes do not seem to be entirely correct, frequencies however are
+            mode == "00" ? continue : nothing #skip the 0 mode
             f = round((z[l+1][n+1]*c)/(2*pi*r), digits = 2)
             haskey(resonances, f) ? (push!(resonances[f], mode)) : push!(resonances, f => [mode])
         end
@@ -147,6 +147,7 @@ module Analysis
         n = 2*2^(ceil(Int, log2(length(signal)))+5) # Calculate the next power of 2
         padded_signal = vcat(signal, zeros(n - length(signal))) # Zero pad the signal
         F = (fftshift(abs.(fft(padded_signal))))
+        display()
         freqs = fftshift(fftfreq(length(padded_signal), fs))
         pos_i_0 = findfirst(>=(0),freqs) #finding the indices of the positive frequencies
         posi_i_n = length(freqs)
@@ -162,8 +163,8 @@ module Analysis
 end
 
 module Colours
-#using Makie
-using CairoMakie
+using Makie
+#using CairoMakie
 export blue, orange, green, pink, lightblue, redish, yellow
 blue = Makie.wong_colors()[1]
 orange = Makie.wong_colors()[2]

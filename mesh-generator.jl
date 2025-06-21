@@ -198,12 +198,20 @@ end
 
 module SetupCalculations
     #A function to calculate the correct transmssion-line length for a given resolution
-    function tllByResolution(Δl, c, frequency)
-        #Δl = points per wavelength, how many transmission-line lengths go into one wavelength
+    function tllByResolution(tll, c, frequency)
+        #ppwl = points per wavelength, how many transmission-line lengths go into one wavelength
         #tll = transmission line length
         #c = speed of sound
         wavelength = c/frequency
-        tll = wavelength/Δl
+        ppwl = wavelength/tll
+        return ppwl
+    end 
+    function tllFromResolution(ppwl, c, frequency)
+        #ppwl = points per wavelength, how many transmission-line lengths go into one wavelength
+        #tll = transmission line length
+        #c = speed of sound
+        wavelength = c/frequency
+        tll = wavelength/ppwl
         return tll
     end
 end

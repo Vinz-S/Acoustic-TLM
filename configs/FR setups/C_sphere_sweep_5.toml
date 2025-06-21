@@ -1,18 +1,16 @@
 #Configuration file example, following TOML
 c = 343	
 #duration = 0.05 #in seconds, aiming for 4 reflections between the most distant walls
-duration = 0.51 #in seconds, chosen using the rooms reverberation time and chirp length
+duration = 0.92 #in seconds, chosen using the rooms reverberation time and chirp length
 [mesh]
-filename = "C_3x4x2.5_0.25tll" #.jld2 added by script
+filename = "C_3x4x2.5_s5" #.jld2 added by script
 type = "Cartesian" #Types: "Tetraheder" "Cartesian"
 	[mesh.dimensions]
-	x = 3.0
-	y = 4.0
-	z = 2.5
-	tll = 0.25 #Aiming for right under 10 Δl at 150Hz
+	r = 2.0
+	tll = 0.3 #Aiming for right under 10 Δl at 150Hz
 [surfaces]
 #name = ["reflecting", "transmitting"] #This is currently not used by the script
-r_factor = 0.8 #Just a randomly chosen value where sound energy will get reduced over time.
+r_factor = 0.9 #Just a randomly chosen value where sound energy will get reduced over time.
 [sources] #just placed close to a corner.
 x = [0.3]
 y = [0.3]
@@ -20,14 +18,13 @@ z = [0.3]
 amp = [1000] #Just really chosen a value, as long as it's above 0 the result is the same.
 freq = [3430] #kHz
 type = ["chirp"] #Types : "sine"	"dirac"	"chirp"
-fl = 2
-fh = 260
+fl = 5
+fh = 220
 T = 0.1
 periods = [1]
 [measurements]
-filename = "Chirp C_3x4x2.5_0.25tll" #.jld2 added by script
+filename = "Chirp C_3x4x2.5_s5" #.jld2 added by script
 	[measurements.microphones]
-	x = [1.5, 0.3, 1.8, 1.6] #trying to have it spread out somewhat without following a pattern.
-	y = [2.0, 3.7, 1.2, 1.8]
-	z = [1.25, 0.3, 2.0, 1.3]
-
+	x = [3.0, 1.5, 2.8, 1.0]#trying to have it spread out somewhat without following a pattern.
+	y = [2.7, 2.0, 0.4, 1.0]
+	z = [1.2, 2.8, 1.5, 2.0]

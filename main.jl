@@ -8,8 +8,8 @@ using StaticArrays
 using ProgressBars
 #flow:
 #extract data from config filegp
-config_name = "signal_test_tetra_20" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
-configs = TOML.parsefile("configs/"*config_name*".toml")
+config_name = "C_sphere_sweep_20" #"exampleconfig" #NEEDS TO BE UPDATED BETWEEN DIFFERENT SIMULATIONS
+configs = TOML.parsefile("configs/FR setups/"*config_name*".toml")
 c = configs["c"]*sqrt(3) #speed of sound, multiplied by sqrt(3) to account for the 3D mesh
 
 #creating/loading mesh_file
@@ -25,7 +25,7 @@ it_time = tll/c #time per iteration
     #generate mesh
     mconf = configs["mesh"]
     if haskey(mconf["dimensions"], "r")
-        mesh, tree = Generator.spheres(mconf["dimensions"]["r"],
+        mesh, tree = Generator.sphere(Float64(mconf["dimensions"]["r"]),
                             crystal = mconf["type"], transmission_line_length = tll)
     else
         mesh, tree = Generator.nodes((mconf["dimensions"]["x"], mconf["dimensions"]["y"], mconf["dimensions"]["z"]),
@@ -71,7 +71,8 @@ mic_configs = configs["measurements"]["microphones"]
 measurement_points = [SVector{3,Float64}(mic_configs["x"][i], mic_configs["y"][i], mic_configs["z"][i]) for i in eachindex(mic_configs["x"])]
 pbar = ProgressBar(length(measurement_points))
 for point in measurement_points
-    if point[1] > configs["mesh"]["dimensions"]["x"] || point[2] > configs["mesh"]["dimensions"]["y"] || point[3] > configs["mesh"]["dimensions"]["z"]
+    if haskey(mconf["dimensions"], "r")
+    elseif point[1] > configs["mesh"]["dimensions"]["x"] || point[2] > configs["mesh"]["dimensions"]["y"] || point[3] > configs["mesh"]["dimensions"]["z"]
         println("Measurement point out of bounds: "*string(point))
         filter!(v->v!=point, measurement_points)
     end
