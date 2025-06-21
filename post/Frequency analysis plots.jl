@@ -2,18 +2,18 @@ codepath = "/home/vinzenz/Documents/Master/Acoustic-TLM/"
 include(codepath*"post.jl"); import .Colours: blue, orange, green, pink, lightblue, redish, yellow
 include(codepath*"TLM-solver.jl")
 include(codepath*"mesh-generator.jl")
-using GLMakie
-GLMakie.activate!(inline=false)
-# using CairoMakie
+# using GLMakie
+# GLMakie.activate!(inline=false)
+using CairoMakie
 using TOML
 using JLD2
 using FileIO
 using GLMakie
 
 ###First resonance test
-crystal = "C" # "T"
-cavity = "shoe" # "sphere"
-signal = "sweep" # "dirac"
+crystal = "C" # "T" # 
+cavity = "shoe" # "sphere" # 
+signal = "dirac" # "sweep" # 
 resolutions = ["5", "10", "20"] #resolutions of the mesh
 colours = [blue, green, pink]
 max_f = (cavity == "shoe" ? 110 : 215)*1.3 #maximum frequency for the plots
@@ -21,7 +21,6 @@ min_f = 35
 config_names = ["FR setups/"*crystal*"_"*cavity*"_"*signal*"_"*resolution for resolution in resolutions]
 
 configs = [TOML.parsefile("configs/"*config_name*".toml") for config_name in config_names]
-dimensions = configs[1]["mesh"]["dimensions"]["x"], configs[1]["mesh"]["dimensions"]["y"], configs[1]["mesh"]["dimensions"]["z"]
 measurements = [load("results/"*configs[i]["measurements"]["filename"]*".jld2", "measurements") for i in eachindex(configs)]
 c = configs[1]["c"]*sqrt(3) #speed of sound in the medium
 it_times = [(configs[i]["mesh"]["dimensions"]["tll"]/c) for i in eachindex(configs)] #time per iteration
@@ -29,14 +28,26 @@ fs = [1/it_time for it_time in it_times] #sampling frequency
 
 width = 1200; height = 900
 fig = Figure(size = (width, height))
+shape = (cavity == "shoe" ? "shoe-box shaped" : (cavity == "sphere" ? "spherical" : "unkown shape"))
+meshtype = (crystal == "C" ? " cartesian TLM" : (crystal == "T" ? " tetrahedral TLM" : " unkown mesh type"))
+supertitle = Label(fig[0, 1:2], "Frequency response from a "*signal*" in a "*shape*meshtype, fontsize = 30, tellwidth = false)
 faxs = [] #Frequency response amlitudes
 iaxs = [] #Impulse response amplitudes
 taxs = [0:it_time:(length(measurements[j][1])-1)*it_time for (j, it_time) in enumerate(it_times)] #time axis for the measurements
-Fs = [[[], 1:2] for i in eachindex(configs)]
+Fs = [[[], 1:2] for i in eachindex(configs)]    
 modes = []
-for (i, f) in enumerate(Analysis.analytic_cubic_resonance(dimensions[1], dimensions[2], dimensions[3], configs[1]["c"]))
-    f = f[1]
-    i > 10 ? break : push!(modes, f)
+if cavity == "shoe"
+    dimensions = configs[1]["mesh"]["dimensions"]["x"], configs[1]["mesh"]["dimensions"]["y"], configs[1]["mesh"]["dimensions"]["z"]
+    for (i, f) in enumerate(Analysis.analytic_cubic_resonance(dimensions[1], dimensions[2], dimensions[3], configs[1]["c"]))
+        f = f[1]
+        i > 10 ? break : push!(modes, f)
+    end
+elseif cavity == "sphere"
+    r = configs[1]["mesh"]["dimensions"]["r"] 
+    for (i, f) in enumerate(Analysis.analytic_spherical_resonance(r, configs[1]["c"]))
+        f = f[1]
+        i > 10 ? break : push!(modes, f)
+    end
 end
 
 ABCD = ["A", "B", "C", "D"]
@@ -70,26 +81,25 @@ for j in eachindex(Fs)
     end
 end
 
-i = length(iaxs) + 1
-    sources = [load("results/"*configs[i]["measurements"]["filename"]*".jld2", "source output")[3][1] for i in eachindex(configs)]
-    push!(iaxs, Axis(fig[i, 2], title = "source", #xscale = log10,
-    xminorticksvisible = true, xminorgridvisible = true,
-    xminorticks = IntervalsBetween(5), xlabel = "Time [s]"))
-    for j in eachindex(sources)
-        source = sources[j]
-        stairs!(iaxs[i], [source[i][1] for i in eachindex(source)], [source[i][2] for i in eachindex(source)], step=:center, color = colours[j])
-    end
-    #stairs!(iaxs[i], [source[i][1] for i in eachindex(source)], [source[i][2] for i in eachindex(source)], step=:center)
-    push!(faxs, Axis(fig[i, 1], title = "FFT source", xscale = log10,
-    xminorticksvisible = true, xminorgridvisible = true,
-    xminorticks = IntervalsBetween(5), xlabel = "Frequency [Hz]", ylabel = "Amplitude"))
-    # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
-    for j in eachindex(sources)
-        freqs, F = Analysis.signal_frequencies(Vector{Float64}([sources[j][i][2] for i in eachindex(sources[j])]), fs[j] ,min_f, max_f) #test with the first measurement point
-        stairs!(faxs[i], freqs, F/maximum(F), step=:center, color = colours[j])#, markersize = 10)
-    end
-    display(fig)
-
+if signal == "sweep"
+    i = length(iaxs) + 1
+        sources = [load("results/"*configs[i]["measurements"]["filename"]*".jld2", "source output")[3][1] for i in eachindex(configs)]
+        push!(iaxs, Axis(fig[i, 2], title = "source", #xscale = log10,
+        xminorticksvisible = true, xminorgridvisible = true,
+        xminorticks = IntervalsBetween(5), xlabel = "Time [s]"))
+        for j in eachindex(sources)
+            source = sources[j]
+            stairs!(iaxs[i], [source[i][1] for i in eachindex(source)], [source[i][2] for i in eachindex(source)], step=:center, color = colours[j])
+        end
+        push!(faxs, Axis(fig[i, 1], title = "FFT source", xscale = log10,
+        xminorticksvisible = true, xminorgridvisible = true,
+        xminorticks = IntervalsBetween(5), xlabel = "Frequency [Hz]", ylabel = "Amplitude"))
+        # I might want to inspect the impulse response and limit the lengths before calculating the frequency response.
+        for j in eachindex(sources)
+            freqs, F = Analysis.signal_frequencies(Vector{Float64}([sources[j][i][2] for i in eachindex(sources[j])]), fs[j] ,min_f, max_f) #test with the first measurement point
+            stairs!(faxs[i], freqs, F/maximum(F), step=:center, color = colours[j])#, markersize = 10)
+        end
+end
 
 i = length(iaxs) + 1
     #push!(iaxs, Axis(fig[i, 2]))
@@ -100,10 +110,11 @@ i = length(iaxs) + 1
     for j in eachindex(Fs)
         push!(plots, stairs!(faxs[i], Fs[j][2], avg_f[j], step=:center, color = colours[j]))#, markersize = 10)
     end
-    #stairs!(faxs[i], Fs[2], avg_f, step=:center)#, markersize = 10)
     mode = vlines!(faxs[i], modes, color = redish)
     Legend(fig[i, 2],
     [plots;[mode]],
     [["TLLs per Wavelength: $(resolutions[j])" for j in eachindex(measurements)];["Analytical modal frequencies"]], tellwidth = false)
+    save("results/fft averages/average fft "*crystal*"_"*cavity*"_"*signal*".jld2", "Fs", Fs, "modes", modes, "avg_f", avg_f)
 
-# save("results/frequency plot"*crystal*"_"*cavity*"_"*signal*".pdf", fig)
+display(fig)
+save("results/plots/frequency plot"*crystal*"_"*cavity*"_"*signal*".pdf", fig)
