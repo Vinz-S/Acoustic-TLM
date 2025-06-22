@@ -33,7 +33,7 @@ for (i, file) in enumerate(data_files[1:4])
     crystal = (i%2 == 0 ? "tetrahedral" : "cartesian")
     signal = (i <= 2 ? "dirac" : "sine sweep")
     ax = Axis(fig[i, 1],
-    title = "Signal: $signal\t Cavity: shoe-box\t Crystal: $crystal\t ",
+    title = "Signal: $signal \t \t Crystal: $crystal",
     xscale = log10, xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5), ylabel = "Amplitude", xlabel = (i == 4 ? "Frequency [Hz]" : ""))
     plots = []
@@ -58,11 +58,11 @@ for (i, file) in enumerate(data_files[5:8])
     avg_f = data["avg_f"]
     
     crystal = (i%2 == 0 ? "tetrahedral" : "cartesian")
-    signal = (i <= 6 ? "dirac" : "sine sweep")
+    signal = (i <= 2 ? "dirac" : "sine sweep")
     ax = Axis(fig[i, 1],
-    title = "Signal: $signal\t Cavity: shoe-box\t Crystal: $crystal\t ",
+    title = "Signal: $signal \t \t Crystal: $crystal",
     xscale = log10, xminorticksvisible = true, xminorgridvisible = true,
-    xminorticks = IntervalsBetween(5), ylabel = "Amplitude", xlabel = (i == 8 ? "Frequency [Hz]" : ""))
+    xminorticks = IntervalsBetween(5), ylabel = "Amplitude", xlabel = (i == 4 ? "Frequency [Hz]" : ""))
     plots = []
     for j in eachindex(Fs)
         push!(plots, stairs!(ax, Fs[j][2], avg_f[j], step=:center, color=colours[j]))

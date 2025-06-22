@@ -137,7 +137,7 @@ module Analysis
         for l = 0:7, n = 0:7
             mode = "$(l)$(n)" # The modes do not seem to be entirely correct, frequencies however are
             mode == "00" ? continue : nothing #skip the 0 mode
-            f = round((z[l+1][n+1]*c)/(2*pi*r), digits = 2)
+            f = round((z[n+1][l+1]*c)/(2*pi*r), digits = 2)
             haskey(resonances, f) ? (push!(resonances[f], mode)) : push!(resonances, f => [mode])
         end
         return resonances #have them in a dataframe?

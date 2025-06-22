@@ -37,6 +37,11 @@ f = [f[1] for f in fs]
 m = [m[2] for m in fs]
 display(fs)
 
+fs = Analysis.analytic_cubic_resonance(3,4,2.5,343)
+f = [f[1] for f in fs]
+m = [m[2] for m in fs]
+display(fs)
+
 fig = Figure()
 ax = Axis(fig[1,1])
 stem!(ax, f, [1 for i in f])
